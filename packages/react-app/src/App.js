@@ -13,7 +13,7 @@ import GET_TRANSFERS from "./graphql/subgraph";
 import { BackgroundColor } from "chalk";
 import SpiderGraph from './SpiderGraph'
 const d3 = require('d3')
-
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 function WalletButton({ provider, loadWeb3Modal }) {
   return (
     <Button
@@ -48,14 +48,19 @@ function App() {
   }
 
   const handleOtherAddress = async(event)=>{
-    let _value = event.target.value
+    let _value = event.target.value.trim()
     let _address, _name
-    if(_value.length === 42 && _value.match(/^0x/)){
-
-      _address = _value
-    } else if(_value.match(/eth$/)){
-      _name = _value
-      _address = await ens.name(_value).getAddress()
+    try{
+      if(_value.length === 42 && _value.match(/^0x/)){
+        _address = _value
+      } else if(_value.match(/eth$/)){
+        _name = _value
+        console.log('***', {_value})
+        _address = await ens.name(_value).getAddress()
+      }
+    }catch(e){
+      _address = EMPTY_ADDRESS
+      console.log(e)
     }
     if(_name){
       setOtherName(_name)
@@ -193,9 +198,9 @@ function App() {
         <>
           <p>Try alexmasmej.eth , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
           <input onChange={handleOtherAddress} placeholder="Enter Eth address" defaultValue={otherName || otherAddress}></input>
-          <p>{otherAddress}</p>
+          {otherAddress === EMPTY_ADDRESS ? (<p>Invalid address</p>) : (<p>{otherAddress}</p>)}
           <p>
-            <Button onClick={() => readOnChainData(coins, addresses, otherAddress)}>
+            <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => readOnChainData(coins, addresses, otherAddress)}>
             Add Token Balances
             </Button>
           </p>
