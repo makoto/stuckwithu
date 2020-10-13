@@ -49,7 +49,8 @@ function App() {
 
   const handleOtherAddress = async(event)=>{
     let _value = event.target.value.trim()
-    let _address, _name
+    let _address = EMPTY_ADDRESS
+    let _name
     try{
       if(_value.length === 42 && _value.match(/^0x/)){
         _address = _value
@@ -59,7 +60,6 @@ function App() {
         _address = await ens.name(_value).getAddress()
       }
     }catch(e){
-      _address = EMPTY_ADDRESS
       console.log(e)
     }
     if(_name){
@@ -198,7 +198,7 @@ function App() {
         <>
           <p>Try alexmasmej.eth , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
           <input onChange={handleOtherAddress} placeholder="Enter Eth address" defaultValue={otherName || otherAddress}></input>
-          {otherAddress === EMPTY_ADDRESS ? (<p>Invalid address</p>) : (<p>{otherAddress}</p>)}
+          {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
           <p>
             <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => readOnChainData(coins, addresses, otherAddress)}>
             Add Token Balances
