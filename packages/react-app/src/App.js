@@ -50,9 +50,7 @@ function App() {
   }
 
   const handleSearch = async(event) => {
-    console.log('***handleSearch1', {event, tokenOptions})
     let selected = tokenOptions.filter((t) => t.symbol === event)[0]
-    console.log('***handleSearch2', {selected})
     lookupTokenSymbol(selected)
   }
 
@@ -65,7 +63,6 @@ function App() {
         _address = _value
       } else if(_value.match(/eth$/)){
         _name = _value
-        console.log('***', {_value})
         _address = await ens.name(_value).getAddress()
       }
     }catch(e){
@@ -107,9 +104,10 @@ function App() {
       }
       defaultProvider = getDefaultProvider();
       ceaErc20 = new Contract(newCoin.token_address, abis.erc20, defaultProvider);
+      let denominator = Math.pow(10, body.decimals)
       for (let j = 0; j < addresses.length; j++) {
         let newBalance = await ceaErc20.balanceOf(addresses[j].address)
-        newCoin.tokenBalances.push(newBalance / 10000)
+        newCoin.tokenBalances.push(newBalance / denominator)
       }
 
       setCoins((prevState) => {
@@ -131,10 +129,11 @@ function App() {
       ceaErc20 = new Contract(coin.token_address, abis.erc20, defaultProvider);
       otherTokenBalance = await ceaErc20.balanceOf(otherAddress);
       setCoins((prevState) => {
+        let denominator = Math.pow(10, prevState[i].decimals)
         if(!prevState[i].tokenBalances){
-          prevState[i].tokenBalances = [otherTokenBalance / 10000]
+          prevState[i].tokenBalances = [otherTokenBalance / denominator]
         }else{
-          prevState[i].tokenBalances.push(otherTokenBalance / 10000)
+          prevState[i].tokenBalances.push(otherTokenBalance / denominator )
         }
         return prevState
       })

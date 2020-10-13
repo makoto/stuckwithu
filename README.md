@@ -11,6 +11,13 @@ a social network on top of existing social tokens.
 
 This project was bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app).
 
+## TODO
+
+- Do not allow entering duplicate Address
+- Remove duplicate tokens
+- Support StakeWithMe
+- Support Coingecko https://www.coingecko.com/en?category_id=social-money&view=market
+
 ## Project Structure
 
 The default template is a monorepo created with [Yarn Workspaces](https://classic.yarnpkg.com/en/docs/workspaces/).
