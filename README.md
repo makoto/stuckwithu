@@ -1,3 +1,14 @@
+
+# Stuck with u
+
+a social network on top of existing social tokens.
+
+- Whitelist of existing social tokens
+- Show which address holds which social tokens
+- Add addresses/friends and see what crossover of token holdings you have
+
+[Inspiration](https://twitter.com/Flynnjamm/status/1313182142935883776)
+
 This project was bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app).
 
 ## Project Structure
