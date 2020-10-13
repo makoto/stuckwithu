@@ -7,11 +7,12 @@ import { Body, Button, Header, Image, Link } from "./components";
 import { web3Modal, logoutOfWeb3Modal } from './utils/web3Modal'
 import logo from "./logo.png";
 import ENS, { getEnsAddress, namehash } from '@ensdomains/ensjs'
-
 import { abis } from "@project/contracts";
 import GET_TRANSFERS from "./graphql/subgraph";
 import { BackgroundColor } from "chalk";
 import SpiderGraph from './SpiderGraph'
+import SelectSearch from 'react-select-search';
+
 const d3 = require('d3')
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 function WalletButton({ provider, loadWeb3Modal }) {
@@ -40,11 +41,19 @@ function App() {
   const [coins, setCoins] = useState(coinData);
   const [update, setUpdate] = useState(new Date())
   const [tokenSymbol, setTokenSymbol] = useState()
+  const [tokenOptions, setTokenOptions] = useState()
   const [ens, setEns] = useState();
 
   const handleToken = async(event) => {
     let _value = event.target.value
     setTokenSymbol(_value)
+  }
+
+  const handleSearch = async(event) => {
+    console.log('***handleSearch1', {event, tokenOptions})
+    let selected = tokenOptions.filter((t) => t.symbol === event)[0]
+    console.log('***handleSearch2', {selected})
+    lookupTokenSymbol(selected)
   }
 
   const handleOtherAddress = async(event)=>{
@@ -83,9 +92,9 @@ function App() {
     setOtherName(name)
   }, []);
 
-  async function lookupTokenSymbol() {
-    const response = await fetch(`https://api.tryroll.com/v2/tokens/${tokenSymbol}`);
-    const body = await response.json()
+  async function lookupTokenSymbol(body) {
+    // const response = await fetch(`https://api.tryroll.com/v2/tokens/${tokenSymbol}`);
+    // const body = await response.json()
     let ceaErc20, defaultProvider
     if(body.contractAddress){
       let newCoin = {
@@ -134,8 +143,35 @@ function App() {
   }
   const hasTokenBalances = !!coins[0].tokenBalances
 
+  function renderFriend(props, option, snapshot, className) {
+    const imgStyle = {
+        borderRadius: '50%',
+        verticalAlign: 'middle',
+        marginRight: 10,
+    };
+
+    return (
+        <button {...props} className={className} type="button">
+            <span><img alt="" style={imgStyle} width="32" height="32" src={option.logo} /><span>{option.name}</span></span>
+        </button>
+    );
+  }
+
   /* If user has loaded a wallet before, load it automatically. */
   useEffect(() => {
+    fetch(`https://api.tryroll.com/v2/tokens`).then((data) =>{
+      data.json().then((d)=>{
+        console.log({d})
+        setTokenOptions(
+          d.map((dd) => { return {
+            ...dd,
+            value:dd.symbol,
+            name:dd.symbol,
+            label:'hello'
+          }})
+        )
+      })
+    })
     if (web3Modal.cachedProvider) {
       loadWeb3Modal();
     }
@@ -236,11 +272,14 @@ function App() {
           {
             hasTokenBalances && (
               <>
-                <input onChange={handleToken} placeholder="Enter Token symbol" ></input>
+                <SelectSearch  renderOption={renderFriend} options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" />
+
+                {/* <input onChange={handleToken} placeholder="Enter Token symbol" ></input>
+
                 <p>Try whale , karma , cami , swagg</p>
                 <Button onClick={() => lookupTokenSymbol()}>
                   Add token symbol
-                </Button>
+                </Button> */}
               </>
             )
           }
