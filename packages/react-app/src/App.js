@@ -12,6 +12,26 @@ import GET_TRANSFERS from "./graphql/subgraph";
 import { BackgroundColor } from "chalk";
 import SpiderGraph from './SpiderGraph'
 import SelectSearch from 'react-select-search';
+import Select from 'react-select'
+
+const customStyles = {
+  option: (provided, state) => ({
+    ...provided,
+    borderBottom: '1px dotted pink',
+    color: state.isSelected ? 'red' : 'blue',
+    padding: 20,
+  }),
+  control: () => ({
+    // none of react-select's styles are passed to <Control />
+    width: 500,
+  }),
+  singleValue: (provided, state) => {
+    const opacity = state.isDisabled ? 0.5 : 1;
+    const transition = 'opacity 300ms';
+
+    return { ...provided, opacity, transition };
+  }
+}
 
 const d3 = require('d3')
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -45,16 +65,20 @@ function App() {
   const [ens, setEns] = useState();
 
   const handleToken = async(event) => {
+    console.log('handleToken', event)
+
     let _value = event.target.value
     setTokenSymbol(_value)
   }
 
   const handleSearch = async(event) => {
-    let selected = tokenOptions.filter((t) => t.symbol === event)[0]
+    console.log('handleSearch', event)
+    let selected = tokenOptions.filter((t) => t.symbol === event.label)[0]
     lookupTokenSymbol(selected)
   }
 
   const handleOtherAddress = async(event)=>{
+    console.log('handleOtherAddress', event.target.value)
     let _value = event.target.value.trim()
     let _address = EMPTY_ADDRESS
     let _name
@@ -165,8 +189,7 @@ function App() {
           d.map((dd) => { return {
             ...dd,
             value:dd.symbol,
-            name:dd.symbol,
-            label:'hello'
+            label:dd.symbol
           }})
         )
       })
@@ -271,8 +294,10 @@ function App() {
           {
             hasTokenBalances && (
               <>
-                <SelectSearch  renderOption={renderFriend} options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" />
-
+                {/* <SelectSearch  renderOption={renderFriend} options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" /> */}
+                <Select
+                styles={customStyles}
+                options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" />
                 {/* <input onChange={handleToken} placeholder="Enter Token symbol" ></input>
 
                 <p>Try whale , karma , cami , swagg</p>

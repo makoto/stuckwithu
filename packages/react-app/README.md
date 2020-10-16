@@ -1,75 +1,35 @@
-# @project/react-app
+## Data format
 
-This package is a fork of the default template provided by [Create React App](https://github.com/facebook/create-react-app).
+### Default
 
-## Available Scripts
+````
+    "id":"flynnjamm",
+    "symbol":"jamm",
+    "name":"FlynnJamm",
+    "token_address": "0x56687cf29ac9751ce2a4e764680b6ad7e668942e",
+    "image":"https://assets.coingecko.com/coins/images/11943/large/FlynnJamm.jpg?1596385323",
+    "decimals":4
+````
 
-In the project directory, you can run:
+### TryRoll
 
-### `yarn start`
+```
+{
+    "name":"Paul Razvan Berg",
+    "symbol":"PAUL",
+    "decimals":4,
+    "contractAddress":"0x8db6Da2120b346FAa7f206841f2FB005BBE0DFD8",
+    "logo":"https://roll-token.s3.amazonaws.com/PAUL/02cbfef1-39f1-471b-994d-ec26e30f1460"
+}
+```
 
-Runs the app in development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Stake With Me
 
-The page will automatically reload if you make changes to the code.<br>
-You will see the build errors and lint warnings in the console.
-
-### `yarn test`
-
-Runs the test watcher in an interactive mode.<br>
-By default, runs tests related to files changed since the last commit.
-
-[Read more about testing.](https://facebook.github.io/create-react-app/docs/running-tests)
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the React documentation on [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn react-app:eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` the React app at any time. This command will
-remove the single build dependency from your React package.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right
-into your project so you have full control over them. All of the commands except `eject` will still work, but
-they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+```
+{
+    "_id":"0x3C335B7AC0b5ACe65Bd096E748473030c4030302","meTokenAdd":"0x3C335B7AC0b5ACe65Bd096E748473030c4030302",
+    "meTokenName":"$CBOB",
+    "poolBalance":1327586795717055200,
+    "lockedBalance":313036988570736200,
+    "ownersAdd":"0xA64fc17B157aaA50AC9a8341BAb72D4647d0f1A7","totalSupply":"115220952769756906666706","initialPoolBalance":0.0001,"initialSupply":1000,"connectorWeight":500000,"refundRatio":25,"isHidden":false,"profile":{"description":"Founder of meTokens","name":"CBobRobison","collectiblesFavorites":[{"address":"0x22c1f6050e56d2876009903609a2cc3fef83b415","token_id":"6291"},
+```

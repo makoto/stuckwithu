@@ -1,5 +1,23 @@
 [
     {
+       "id": "PEW",
+       "symbol":"pew",
+       "name":"ameen",
+       "cateory": "dao",
+       "token_address": "0x892091bDd49FE955859D4bbB8a9A2B7685CCec82",
+       "decimals": 18,
+       "image": "https://pbs.twimg.com/profile_images/1255616684624232451/IrjYmlGs_400x400.jpg"
+    },
+    {
+      "id": "JAKE",
+      "symbol": "jake",
+      "name": "Jake Brukhman",
+      "cateory": "vc",
+      "token_address": "0x277697fa7c134a7fcc2aaaf812bdf1fd8b68b818",
+      "decimals": 18,
+      "image":"https://ipfs.io/ipfs/QmSQUvWszwqxfZUAMkGaEkk9u3K5Cj4mun9ZuiTGeZ4tTU"
+    },
+    {
        "id":"flynnjamm",
        "symbol":"jamm",
        "name":"FlynnJamm",
@@ -13,28 +31,6 @@
        "token_address": "0x8ba6dcc667d3ff64c1a2123ce72ff5f0199e5315",
        "name":"Alex",
        "image":"https://assets.coingecko.com/coins/images/10972/large/ALEX.png?1586742545",
-       "current_price":0.04767878,
-       "market_cap":249429,
-       "market_cap_rank":1231,
-       "fully_diluted_valuation":476788,
-       "total_volume":196.09,
-       "high_24h":0.04822354,
-       "low_24h":0.04789954,
-       "price_change_24h":-0.00054476,
-       "price_change_percentage_24h":-1.12965,
-       "market_cap_change_24h":-736.49346986,
-       "market_cap_change_percentage_24h":-0.2944,
-       "circulating_supply":5231454.0114,
-       "total_supply":10000000.0,
-       "max_supply":10000000.0,
-       "ath":0.107563,
-       "ath_change_percentage":-55.67381,
-       "ath_date":"2020-09-15T10:32:46.747Z",
-       "atl":0.00631081,
-       "atl_change_percentage":655.50935,
-       "atl_date":"2020-04-13T05:27:41.033Z",
-       "roi":null,
-       "last_updated":"2020-10-05T19:20:30.694Z",
        "decimals":4
     },
     {
