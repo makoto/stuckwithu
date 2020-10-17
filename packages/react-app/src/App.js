@@ -63,46 +63,58 @@ function App() {
   const [update, setUpdate] = useState(new Date())
   const [tokenSymbol, setTokenSymbol] = useState()
   const [tokenOptions, setTokenOptions] = useState()
+  const [ethUsdPrice, setEthUsdPrice] = useState()
   const [ens, setEns] = useState();
   const handleSearch = async(event) => {
     let value = event.value
     let selected, body
-    if(event.value.match(/^0x/)){
-      let query = getTokenQuery(value)
-      let res = await performQuery(query)
-      if(res.errors){
-        setErrorMessage(res.errors[0])
-      }else{
-        let token = res.data.tokens[0]
-        selected = {
-          id: token.symbol,
-          symbol: token.symbol,
-          token_address: token.id,
-          eth: token.derivedEth,
-          decimals: token.decimals
-        }
-      }
-    }else{
+    let msg
+    if(!value.match(/^0x/)){
       body = tokenOptions.filter((t) => t.symbol === event.label)[0]
       if(body){
         selected = {
           id: body.name.toLowerCase(),
           symbol: body.symbol.toLowerCase(),
-          token_address: body.contractAddress,
+          token_address: body.contractAddress.toLowerCase(),
           decimals: body.decimals,
           image: body.logo  
         }  
       }else{
-        setErrorMessage('No matching token')
+        setErrorMessage('No matching token for the symbol')
+        return false
+      }
+    }else{
+      selected = {
+        token_address: body.name.toLowerCase()
       }
     }
-    if(selected){
+
+    let query = getTokenQuery(selected.token_address)
+    let res = await performQuery(query)
+    console.log('***token0', {query, selected, res})
+    if(!res.errors && res.data.tokens.length > 0){
+      console.log('***token1', {res})
+      let token = res.data.tokens[0]
+      console.log('***token2', token)
+      selected = {...selected,...
+      {
+        id: token.symbol,
+        symbol: token.symbol,
+        token_address: token.id,
+        eth: token.derivedETH,
+        decimals: token.decimals
+      }}
+    }
+
+    if(selected.token_address){
+      console.log('***token3', {selected})
       lookupTokenSymbol(selected)
+    }else{
+      setErrorMessage('Token not found')
     }
   }
 
   const performQuery = async(query) => {
-    console.log('***performQuery1', {query})
     const res = await fetch("https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", {
         method: "POST",
         mode: 'cors',
@@ -112,23 +124,10 @@ function App() {
         },
         body:query
     });
-    console.log('***performQuery2', {res})
-    console.log('***performQuery3', res.body)
     return await res.json()
 };
 
 const getTokenQuery = (address) => {
-  // return JSON.stringify({
-  //   operationName:"Account",
-  //   variables:{account:address},
-  //   query:`
-  //   Account($account: String!)
-  //     account(id:$account) {
-  //       id
-  //     }
-  //   }
-  //   `
-  // });
   return JSON.stringify({
     operationName:"Token",
     variables:{id:address},
@@ -145,7 +144,6 @@ const getTokenQuery = (address) => {
     `
   });
 };
-
 
   const handleToken = async(event) => {
     console.log('handleToken', event)
@@ -190,10 +188,7 @@ const getTokenQuery = (address) => {
     setOtherName(name)
   }, []);
 
-  async function lookupTokenSymbol({id, symbol, token_address, decimals, image }) {
-    // const response = await fetch(`https://api.tryroll.com/v2/tokens/${tokenSymbol}`);
-    // const body = await response.json()
-    console.log({id, symbol, token_address, decimals, image })
+  async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image }) {
     let ceaErc20, defaultProvider
     if(token_address){
       let newCoin = {
@@ -202,6 +197,7 @@ const getTokenQuery = (address) => {
         token_address,
         decimals,
         image,
+        eth,
         tokenBalances: []
       }
       defaultProvider = getDefaultProvider();
@@ -246,8 +242,6 @@ const getTokenQuery = (address) => {
 
   const { Option } = components;
   const IconOption = props => {
-    console.log('***IconOption', {props})
-    // debugger
     return (
       <Option {...props}>
         <img
@@ -272,6 +266,12 @@ const getTokenQuery = (address) => {
             label:dd.symbol
           }})
         )
+      })
+    })
+
+    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`).then((data) =>{
+      data.json().then((d)=>{
+        setEthUsdPrice(d.ethereum.usd)
       })
     })
     if (web3Modal.cachedProvider) {
@@ -316,7 +316,7 @@ const getTokenQuery = (address) => {
     body.push(obj)
   }
   var colorLabels = d3.scaleOrdinal(d3.schemeCategory10).domain(body.map(b => b.name))
-
+  console.log('***', {coins, ethUsdPrice})
   return (
     <div>
       <Header>
@@ -360,9 +360,13 @@ const getTokenQuery = (address) => {
                 <td><img width="50px" src={c.image}></img></td>
                 <td>{c.symbol}</td>
                 {c && c.tokenBalances && c.tokenBalances.map((b) => {
+                  if(c.eth){
+                    // debugger
+                  }
                   return (
                     <td>
                       { parseInt(b) }
+                      {c.eth && `($${parseInt(b * parseFloat(c.eth) * ethUsdPrice)})`}
                     </td>
                   )
                 })}
