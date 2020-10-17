@@ -63,3 +63,22 @@ table{
   width: 11px;
   height: 11px;
 }
+.twitter-share-button {
+  margin-top:2em;
+  display: inline-block;
+  background-color: rgb(29, 161, 242);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  margin: 20px;
+  padding: 12px 24px;
+}
+.twitter-share-button:hover {
+  background-position: 0 -21px;
+}

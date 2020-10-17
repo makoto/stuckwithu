@@ -113,7 +113,7 @@ function App() {
     let selected, body
     let msg
     if(!value.match(/^0x/)){
-      body = tokenOptions.filter((t) => t.symbol === value)[0]
+      body = tokenOptions.filter((t) => t.symbol.toLowerCase() === value.toLowerCase())[0]
       if(body){
         selected = {
           id: body.name.toLowerCase(),
@@ -357,7 +357,7 @@ const getTokenQuery = (address) => {
   console.log('***', {coins, tokenOptions, ethUsdPrice, date:new Date()})
   let search = new URLSearchParams(window.location.search)
   let initialCoins = (search.get('coins') && search.get('coins').split(',')) || []
-
+  let initialAddresses = (search.get('addresses') && search.get('addresses').split(',')) || []
   if(tokenOptions.length > 0 && coins.length === 0){
     if(initialCoins.length > 0){
       for (var index = 0; index < initialCoins.length; ++index) {
@@ -375,7 +375,7 @@ const getTokenQuery = (address) => {
       handleSearch('KARMA')
     }
   }
-
+  const shareMessage = `https://twitter.com/intent/tweet?text=Do you own ${coins.map(c => `$${c.symbol}`).join(' ')}? Compare token balance with your friends at ${window.location.origin}/?coins=${coins.map(c => `${c.symbol}`).join(',')}`
   return (
     <div>
       <Header>
@@ -449,6 +449,10 @@ const getTokenQuery = (address) => {
                 components={{ Option: IconOption }}
                 options={tokenOptions} onChange={(e) => { handleSearch(e.value)}} search={true} name="language" placeholder="Select token or add token address"
                 />
+                <h3>Did you find your favorite personal token combos?</h3>
+                <a class="twitter-share-button"
+                  href={shareMessage}>
+                Tweet Your favorite personal tokens</a>
               </p>
             )
           }
