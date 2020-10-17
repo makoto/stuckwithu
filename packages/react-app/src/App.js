@@ -355,14 +355,24 @@ const getTokenQuery = (address) => {
   }
   var colorLabels = d3.scaleOrdinal(d3.schemeCategory10).domain(body.map(b => b.name))
   console.log('***', {coins, tokenOptions, ethUsdPrice, date:new Date()})
+  let search = new URLSearchParams(window.location.search)
+  let initialCoins = (search.get('coins') && search.get('coins').split(',')) || []
+
   if(tokenOptions.length > 0 && coins.length === 0){
-    let search = new URLSearchParams(window.location.search)
-    let initialCoins = search.get('coins').split(',')
     if(initialCoins.length > 0){
       for (var index = 0; index < initialCoins.length; ++index) {
         console.log(initialCoins[index])
         handleSearch(initialCoins[index])
       }
+    }else{
+      handleSearch('JOON')
+      handleSearch('JAMM')
+      handleSearch('ALEX')
+      handleSearch('rac')
+      handleSearch('coin')
+      handleSearch('CHERRY')
+      handleSearch('WHALE')
+      handleSearch('KARMA')
     }
   }
 
