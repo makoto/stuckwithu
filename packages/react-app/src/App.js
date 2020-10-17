@@ -12,14 +12,15 @@ import GET_TRANSFERS from "./graphql/subgraph";
 import { BackgroundColor } from "chalk";
 import SpiderGraph from './SpiderGraph'
 import SelectSearch from 'react-select-search';
-import Select from 'react-select'
+import Select, { components } from "react-select";
 
 const customStyles = {
   option: (provided, state) => ({
-    ...provided,
-    borderBottom: '1px dotted pink',
-    color: state.isSelected ? 'red' : 'blue',
-    padding: 20,
+    ...provided
+    // ,
+    // borderBottom: '1px dotted pink',
+    // color: state.isSelected ? 'red' : 'blue',
+    // padding: 20,
   }),
   control: () => ({
     // none of react-select's styles are passed to <Control />
@@ -180,6 +181,22 @@ function App() {
     );
   }
 
+  const { Option } = components;
+  const IconOption = props => {
+    console.log('***IconOption', {props})
+    // debugger
+    return (
+      <Option {...props}>
+        <img
+          src={props.data.logo}
+          style={{ width: 36 }}
+          alt={props.data.label}
+        />
+        {props.data.label}
+      </Option>
+    );
+  }
+
   /* If user has loaded a wallet before, load it automatically. */
   useEffect(() => {
     fetch(`https://api.tryroll.com/v2/tokens`).then((data) =>{
@@ -297,6 +314,7 @@ function App() {
                 {/* <SelectSearch  renderOption={renderFriend} options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" /> */}
                 <Select
                 styles={customStyles}
+                components={{ Option: IconOption }}
                 options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" />
                 {/* <input onChange={handleToken} placeholder="Enter Token symbol" ></input>
 
