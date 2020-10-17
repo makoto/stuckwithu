@@ -11,7 +11,6 @@ import { abis } from "@project/contracts";
 import GET_TRANSFERS from "./graphql/subgraph";
 import { BackgroundColor } from "chalk";
 import SpiderGraph from './SpiderGraph'
-import SelectSearch from 'react-select-search';
 import Select, { components } from "react-select";
 
 const customStyles = {
@@ -167,20 +166,6 @@ function App() {
   }
   const hasTokenBalances = !!coins[0].tokenBalances
 
-  function renderFriend(props, option, snapshot, className) {
-    const imgStyle = {
-        borderRadius: '50%',
-        verticalAlign: 'middle',
-        marginRight: 10,
-    };
-
-    return (
-        <button {...props} className={className} type="button">
-            <span><img alt="" style={imgStyle} width="32" height="32" src={option.logo} /><span>{option.name}</span></span>
-        </button>
-    );
-  }
-
   const { Option } = components;
   const IconOption = props => {
     console.log('***IconOption', {props})
@@ -311,17 +296,10 @@ function App() {
           {
             hasTokenBalances && (
               <>
-                {/* <SelectSearch  renderOption={renderFriend} options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" /> */}
                 <Select
                 styles={customStyles}
                 components={{ Option: IconOption }}
                 options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" />
-                {/* <input onChange={handleToken} placeholder="Enter Token symbol" ></input>
-
-                <p>Try whale , karma , cami , swagg</p>
-                <Button onClick={() => lookupTokenSymbol()}>
-                  Add token symbol
-                </Button> */}
               </>
             )
           }

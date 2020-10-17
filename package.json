@@ -28,7 +28,5 @@
       "packages/*"
     ]
   },
-  "dependencies": {
-    "react-select-search": "^2.1.1"
-  }
+  "dependencies": {}
 }
