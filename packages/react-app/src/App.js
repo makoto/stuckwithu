@@ -11,8 +11,8 @@ import { abis } from "@project/contracts";
 import GET_TRANSFERS from "./graphql/subgraph";
 import { BackgroundColor } from "chalk";
 import SpiderGraph from './SpiderGraph'
-import Select, { components } from "react-select";
-
+import { components } from "react-select";
+import CreatableSelect from 'react-select/creatable'
 const customStyles = {
   option: (provided, state) => ({
     ...provided
@@ -23,7 +23,7 @@ const customStyles = {
   }),
   control: () => ({
     // none of react-select's styles are passed to <Control />
-    width: 500,
+    width: 600,
   }),
   singleValue: (provided, state) => {
     const opacity = state.isDisabled ? 0.5 : 1;
@@ -57,24 +57,101 @@ function App() {
   const [provider, setProvider] = useState();
   const [addresses, setAddresses] = useState([]);
   const [otherAddress, setOtherAddress] = useState();
+  const [errorMessage, setErrorMessage] = useState();
   const [otherName, setOtherName] = useState();
   const [coins, setCoins] = useState(coinData);
   const [update, setUpdate] = useState(new Date())
   const [tokenSymbol, setTokenSymbol] = useState()
   const [tokenOptions, setTokenOptions] = useState()
   const [ens, setEns] = useState();
+  const handleSearch = async(event) => {
+    let value = event.value
+    let selected, body
+    if(event.value.match(/^0x/)){
+      let query = getTokenQuery(value)
+      let res = await performQuery(query)
+      if(res.errors){
+        setErrorMessage(res.errors[0])
+      }else{
+        let token = res.data.tokens[0]
+        selected = {
+          id: token.symbol,
+          symbol: token.symbol,
+          token_address: token.id,
+          eth: token.derivedEth,
+          decimals: token.decimals
+        }
+      }
+    }else{
+      body = tokenOptions.filter((t) => t.symbol === event.label)[0]
+      if(body){
+        selected = {
+          id: body.name.toLowerCase(),
+          symbol: body.symbol.toLowerCase(),
+          token_address: body.contractAddress,
+          decimals: body.decimals,
+          image: body.logo  
+        }  
+      }else{
+        setErrorMessage('No matching token')
+      }
+    }
+    if(selected){
+      lookupTokenSymbol(selected)
+    }
+  }
+
+  const performQuery = async(query) => {
+    console.log('***performQuery1', {query})
+    const res = await fetch("https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", {
+        method: "POST",
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body:query
+    });
+    console.log('***performQuery2', {res})
+    console.log('***performQuery3', res.body)
+    return await res.json()
+};
+
+const getTokenQuery = (address) => {
+  // return JSON.stringify({
+  //   operationName:"Account",
+  //   variables:{account:address},
+  //   query:`
+  //   Account($account: String!)
+  //     account(id:$account) {
+  //       id
+  //     }
+  //   }
+  //   `
+  // });
+  return JSON.stringify({
+    operationName:"Token",
+    variables:{id:address},
+    query:`
+    query Token($id: String!){
+      tokens(where: {id:$id}) {
+        id
+        symbol
+        name
+        decimals
+        derivedETH
+      }
+    }
+    `
+  });
+};
+
 
   const handleToken = async(event) => {
     console.log('handleToken', event)
 
     let _value = event.target.value
     setTokenSymbol(_value)
-  }
-
-  const handleSearch = async(event) => {
-    console.log('handleSearch', event)
-    let selected = tokenOptions.filter((t) => t.symbol === event.label)[0]
-    lookupTokenSymbol(selected)
   }
 
   const handleOtherAddress = async(event)=>{
@@ -113,22 +190,23 @@ function App() {
     setOtherName(name)
   }, []);
 
-  async function lookupTokenSymbol(body) {
+  async function lookupTokenSymbol({id, symbol, token_address, decimals, image }) {
     // const response = await fetch(`https://api.tryroll.com/v2/tokens/${tokenSymbol}`);
     // const body = await response.json()
+    console.log({id, symbol, token_address, decimals, image })
     let ceaErc20, defaultProvider
-    if(body.contractAddress){
+    if(token_address){
       let newCoin = {
-        id: body.name.toLowerCase(),
-        symbol: body.symbol.toLowerCase(),
-        token_address: body.contractAddress,
-        decimals: body.decimals,
-        image: body.logo,
+        id: id.toLowerCase(),
+        symbol: symbol.toLowerCase(),
+        token_address,
+        decimals,
+        image,
         tokenBalances: []
       }
       defaultProvider = getDefaultProvider();
       ceaErc20 = new Contract(newCoin.token_address, abis.erc20, defaultProvider);
-      let denominator = Math.pow(10, body.decimals)
+      let denominator = Math.pow(10, decimals)
       for (let j = 0; j < addresses.length; j++) {
         let newBalance = await ceaErc20.balanceOf(addresses[j].address)
         newCoin.tokenBalances.push(newBalance / denominator)
@@ -138,7 +216,7 @@ function App() {
         return [...prevState, newCoin]
       })
     }else{
-      console.log('no contractAddress')
+      console.log('no token_address')
     }
   }
 
@@ -284,7 +362,7 @@ function App() {
                 {c && c.tokenBalances && c.tokenBalances.map((b) => {
                   return (
                     <td>
-                      { b }
+                      { parseInt(b) }
                     </td>
                   )
                 })}
@@ -294,13 +372,16 @@ function App() {
           })}
           </table>
           {
-            hasTokenBalances && (
-              <>
-                <Select
+            (true || hasTokenBalances) && (
+              <p>
+                <h2>Add more tokens</h2>
+                <p style={{color:'red'}}>{errorMessage}</p>
+                <CreatableSelect
                 styles={customStyles}
                 components={{ Option: IconOption }}
-                options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Add more token symbol" />
-              </>
+                options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Select token or add token address"
+                />
+              </p>
             )
           }
         </>
