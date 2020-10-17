@@ -84,9 +84,9 @@ export default function SpiderGraph({labels, body}) {
     let _chart = new Chart(ctx, config)
     setChart(_chart)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  if (chart) {
+  if (chart) {    
     const datasets = chart.data.datasets
-    const coinLength = datasets && datasets[0] && datasets[0].data.length
+    const coinLength = (datasets && datasets[0] && datasets[0].data.length || 0)
     // Come up with better way to skip re-renderring too many times.
     if(true){
       for (var index = 0; index < body.length; ++index) {

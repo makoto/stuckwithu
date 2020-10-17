@@ -1,60 +1,35 @@
 [
-    {
-       "id": "PEW",
+   {
+       "label": "PEW",
        "symbol":"pew",
        "name":"ameen",
-       "cateory": "dao",
-       "token_address": "0x892091bDd49FE955859D4bbB8a9A2B7685CCec82",
+       "contractAddress": "0x892091bDd49FE955859D4bbB8a9A2B7685CCec82",
        "decimals": 18,
-       "image": "https://pbs.twimg.com/profile_images/1255616684624232451/IrjYmlGs_400x400.jpg"
+       "logo": "https://pbs.twimg.com/profile_images/1255616684624232451/IrjYmlGs_400x400.jpg"
     },
     {
-      "id": "JAKE",
+      "label": "JAKE",
       "symbol": "jake",
       "name": "Jake Brukhman",
       "cateory": "vc",
-      "token_address": "0x277697fa7c134a7fcc2aaaf812bdf1fd8b68b818",
+      "contractAddress": "0x277697fa7c134a7fcc2aaaf812bdf1fd8b68b818",
       "decimals": 18,
-      "image":"https://ipfs.io/ipfs/QmSQUvWszwqxfZUAMkGaEkk9u3K5Cj4mun9ZuiTGeZ4tTU"
+      "logo":"https://ipfs.io/ipfs/QmSQUvWszwqxfZUAMkGaEkk9u3K5Cj4mun9ZuiTGeZ4tTU"
     },
     {
-       "id":"flynnjamm",
-       "symbol":"jamm",
-       "name":"FlynnJamm",
-       "token_address": "0x56687cf29ac9751ce2a4e764680b6ad7e668942e",
-       "image":"https://assets.coingecko.com/coins/images/11943/large/FlynnJamm.jpg?1596385323",
-       "decimals":4
-    },
-    {
-       "id":"alex",
-       "symbol":"alex",
-       "token_address": "0x8ba6dcc667d3ff64c1a2123ce72ff5f0199e5315",
-       "name":"Alex",
-       "image":"https://assets.coingecko.com/coins/images/10972/large/ALEX.png?1586742545",
-       "decimals":4
-    },
-    {
-       "id":"JOON",
-       "symbol":"joon",
-       "name":"joon",
-       "token_address": "0x174897edd3ce414084a009d22db31c7b7826400d",
-       "image":"https://assets.coingecko.com/coins/images/12595/large/logo.png?1600995905",
-       "decimals":4
-    },
-    {
-      "id":"RAC",
+      "label":"RAC",
       "symbol":"rac",
       "name":"rac",
-      "token_address": "0xc22b30e4cce6b78aaaadae91e44e73593929a3e9",
-      "image":"https://assets.coingecko.com/coins/images/12675/large/rac_logo_%281%29.jpg?1601526417",
+      "contractAddress": "0xc22b30e4cce6b78aaaadae91e44e73593929a3e9",
+      "logo":"https://assets.coingecko.com/coins/images/12675/large/rac_logo_%281%29.jpg?1601526417",
       "decimals":18
    },
    {
-      "id":"coin-artist",
+      "label":"coin-artist",
       "symbol":"coin",
       "name":"Coin Artist",
-      "token_address": "0x87b008e57f640d94ee44fd893f0323af933f9195",
-      "image":"https://assets.coingecko.com/coins/images/12375/small/coin_artist_logo.png?1599403918",
+      "contractAddress": "0x87b008e57f640d94ee44fd893f0323af933f9195",
+      "logo":"https://assets.coingecko.com/coins/images/12375/small/coin_artist_logo.png?1599403918",
       "decimals":18
    }
  ]

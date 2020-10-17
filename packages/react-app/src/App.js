@@ -59,18 +59,61 @@ function App() {
   const [otherAddress, setOtherAddress] = useState();
   const [errorMessage, setErrorMessage] = useState();
   const [otherName, setOtherName] = useState();
-  const [coins, setCoins] = useState(coinData);
+  const [coins, setCoins] = useState([]);
   const [update, setUpdate] = useState(new Date())
   const [tokenSymbol, setTokenSymbol] = useState()
   const [tokenOptions, setTokenOptions] = useState()
   const [ethUsdPrice, setEthUsdPrice] = useState()
   const [ens, setEns] = useState();
-  const handleSearch = async(event) => {
-    let value = event.value
+
+  const addSampleTokens = async(e) =>{
+    switch(e.target.text) {
+      case 'art':
+        await handleSearch('SKULL')
+        await handleSearch('HOWL')
+        await handleSearch('HUE')
+        break;
+      case 'game':
+        await handleSearch('coin')
+        await handleSearch('FORCER')
+        break;
+      case 'media':
+        await handleSearch('JOON')
+        await handleSearch('CAMI')
+        await handleSearch('EVAN')
+        await handleSearch('JAMM')
+        break;
+      case 'dao':
+        await handleSearch('pew')
+        await handleSearch('PETER')
+        await handleSearch('ALEX')
+        break;
+      case 'entertainer':
+        await handleSearch('rac')
+        await handleSearch('CHERRY')
+        await handleSearch('FIRST')
+        break;
+      case 'vc':
+        await handleSearch('jake')
+        await handleSearch('AVC')
+        await handleSearch('WHALE')
+        break;
+      case 'defi':
+        await handleSearch('STANI')
+        await handleSearch('KARMA')
+        await handleSearch('JULIEN')
+        await handleSearch('DUDE')
+        await handleSearch('MARC')
+        break;
+      default:
+    }
+  }
+  const handleSearch = async(value) => {
+    console.log('***handleSearc', {value})
     let selected, body
     let msg
     if(!value.match(/^0x/)){
-      body = tokenOptions.filter((t) => t.symbol === event.label)[0]
+      body = tokenOptions.filter((t) => t.symbol === value)[0]
       if(body){
         selected = {
           id: body.name.toLowerCase(),
@@ -91,11 +134,8 @@ function App() {
 
     let query = getTokenQuery(selected.token_address)
     let res = await performQuery(query)
-    console.log('***token0', {query, selected, res})
     if(!res.errors && res.data.tokens.length > 0){
-      console.log('***token1', {res})
       let token = res.data.tokens[0]
-      console.log('***token2', token)
       selected = {...selected,...
       {
         id: token.symbol,
@@ -238,7 +278,7 @@ const getTokenQuery = (address) => {
       setUpdate(new Date())
     }
   }
-  const hasTokenBalances = !!coins[0].tokenBalances
+  const hasTokenBalances = coins.length === 0 || !!coins[0].tokenBalances
 
   const { Option } = components;
   const IconOption = props => {
@@ -260,7 +300,7 @@ const getTokenQuery = (address) => {
       data.json().then((d)=>{
         console.log({d})
         setTokenOptions(
-          d.map((dd) => { return {
+          [...coinData,...d].map((dd) => { return {
             ...dd,
             value:dd.symbol,
             label:dd.symbol
@@ -279,11 +319,6 @@ const getTokenQuery = (address) => {
     }
   }, [loadWeb3Modal]);
 
-  React.useEffect(() => {
-    if (!loading && !error && data && data.transfers) {
-      console.log({ transfers: data.transfers });
-    }
-  }, [loading, error, data, coins]);
   const labels = coins.map(c => c.symbol )
   const body = []
   for (var index = 0; index < addresses.length; ++index) {
@@ -316,7 +351,7 @@ const getTokenQuery = (address) => {
     body.push(obj)
   }
   var colorLabels = d3.scaleOrdinal(d3.schemeCategory10).domain(body.map(b => b.name))
-  console.log('***', {coins, ethUsdPrice})
+  console.log('***', {coins, tokenOptions, ethUsdPrice})
   return (
     <div>
       <Header>
@@ -360,9 +395,6 @@ const getTokenQuery = (address) => {
                 <td><img width="50px" src={c.image}></img></td>
                 <td>{c.symbol}</td>
                 {c && c.tokenBalances && c.tokenBalances.map((b) => {
-                  if(c.eth){
-                    // debugger
-                  }
                   return (
                     <td>
                       { parseInt(b) }
@@ -378,12 +410,20 @@ const getTokenQuery = (address) => {
           {
             (true || hasTokenBalances) && (
               <p>
-                <h2>Add more tokens</h2>
+                <h2>Add more tokens (sample:
+                  <a href="#" onClick={addSampleTokens}>dao</a>,
+                  <a href="#" onClick={addSampleTokens}>vc</a>,
+                  <a href="#" onClick={addSampleTokens}>defi</a>,
+                  <a href="#" onClick={addSampleTokens}>media</a>,
+                  <a href="#" onClick={addSampleTokens}>entertainer</a>,
+                  <a href="#" onClick={addSampleTokens}>game</a>,
+                  <a href="#" onClick={addSampleTokens}>art</a>
+                )</h2>
                 <p style={{color:'red'}}>{errorMessage}</p>
                 <CreatableSelect
                 styles={customStyles}
                 components={{ Option: IconOption }}
-                options={tokenOptions} onChange={handleSearch} search={true} name="language" placeholder="Select token or add token address"
+                options={tokenOptions} onChange={(e) => { handleSearch(e.value)}} search={true} name="language" placeholder="Select token or add token address"
                 />
               </p>
             )
