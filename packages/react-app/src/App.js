@@ -62,7 +62,7 @@ function App() {
   const [coins, setCoins] = useState([]);
   const [update, setUpdate] = useState(new Date())
   const [tokenSymbol, setTokenSymbol] = useState()
-  const [tokenOptions, setTokenOptions] = useState()
+  const [tokenOptions, setTokenOptions] = useState([])
   const [ethUsdPrice, setEthUsdPrice] = useState()
   const [ens, setEns] = useState();
 
@@ -109,7 +109,7 @@ function App() {
     }
   }
   const handleSearch = async(value) => {
-    console.log('***handleSearc', {value})
+    console.log('***handleSearc', {value, tokenOptions, date:new Date()})
     let selected, body
     let msg
     if(!value.match(/^0x/)){
@@ -147,8 +147,10 @@ function App() {
     }
 
     if(selected.token_address){
-      console.log('***token3', {selected})
-      lookupTokenSymbol(selected)
+      let matched = coins.filter((c) => c.symbol.toLowerCase() === selected.symbol.toLowerCase())
+      if(matched.length === 0){
+        lookupTokenSymbol(selected)
+      }
     }else{
       setErrorMessage('Token not found')
     }
@@ -314,6 +316,7 @@ const getTokenQuery = (address) => {
         setEthUsdPrice(d.ethereum.usd)
       })
     })
+
     if (web3Modal.cachedProvider) {
       loadWeb3Modal();
     }
@@ -351,7 +354,18 @@ const getTokenQuery = (address) => {
     body.push(obj)
   }
   var colorLabels = d3.scaleOrdinal(d3.schemeCategory10).domain(body.map(b => b.name))
-  console.log('***', {coins, tokenOptions, ethUsdPrice})
+  console.log('***', {coins, tokenOptions, ethUsdPrice, date:new Date()})
+  if(tokenOptions.length > 0 && coins.length === 0){
+    let search = new URLSearchParams(window.location.search)
+    let initialCoins = search.get('coins').split(',')
+    if(initialCoins.length > 0){
+      for (var index = 0; index < initialCoins.length; ++index) {
+        console.log(initialCoins[index])
+        handleSearch(initialCoins[index])
+      }
+    }
+  }
+
   return (
     <div>
       <Header>
