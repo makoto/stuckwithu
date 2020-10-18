@@ -456,10 +456,14 @@ const getTokenQuery = (address) => {
                 components={{ Option: IconOption }}
                 options={tokenOptions} onChange={(e) => { handleSearch(e.value)}} search={true} name="language" placeholder="Select token or add token address"
                 />
-                <h3>Did you find your favorite personal token combos?</h3>
-                <a class="twitter-share-button"
-                  href={shareMessage}>
-                Tweet Your favorite personal tokens</a>
+                {coins.length > 0 && (
+                  <>
+                    <h3>Did you find your favorite personal token combos?</h3>
+                    <a class="twitter-share-button"
+                      href={shareMessage}>
+                    Tweet Your favorite personal tokens</a>
+                  </>
+                )}
               </p>
             )
           }
