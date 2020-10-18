@@ -13,6 +13,8 @@ import { BackgroundColor } from "chalk";
 import SpiderGraph from './SpiderGraph'
 import { components } from "react-select";
 import CreatableSelect from 'react-select/creatable'
+import { ethers } from 'ethers';
+
 const customStyles = {
   option: (provided, state) => ({
     ...provided
@@ -182,9 +184,15 @@ function App() {
     });
   };
 
-  const handleOtherAddress = async(event)=>{
-    console.log('handleOtherAddress', event.target.value)
-    let _value = event.target.value.trim()
+  const handleAddressLink = async(e)=>{
+    handleOtherAddress(e.target.text).then((a)=> {
+      readOnChainData(a)
+    })
+  }
+
+  const handleOtherAddress = async(value)=>{
+    console.log('handleOtherAddress', value)
+    let _value = value.trim()
     let _address = EMPTY_ADDRESS
     let _name
     try{
@@ -203,6 +211,10 @@ function App() {
     if(_address){
       setOtherAddress(_address)
     }
+    return({
+      name:_name,
+      address:_address
+    })
   }
   
   /* Open wallet selection modal. */
@@ -255,37 +267,26 @@ function App() {
     let batchAddresses;
     const batchTokens = [];
     let otherTokenBalance
-    console.log('***readOnChainData1', {length:addresses.length})
     if(newAddress){
       batchAddresses = addresses.map(a => a.address)  
-      batchAddresses.push(otherAddress)
+      batchAddresses.push(newAddress.address)
       setAddresses([...addresses, newAddress]);
     }
     for (let i = 0; i < coins.length; i++) {
       let coin = coins[i]
       batchTokens.push(coin.token_address)
     }
-    console.log('***readOnChainData2', {length:addresses.length, batchAddresses, batchTokens})
     const balanceChecker = new Contract(BALANCE_CHECKER_ADDRESS, abis.balanceChecker, defaultProvider);
     let batchResult = await balanceChecker.balances(batchAddresses, batchTokens);
-    console.log('***batchResult1', {batchResult})
     let matrix = []
     for (let i = 0; i < batchAddresses.length; i++) {
-      console.log('***batchResult2', i)
       for (let j = 0; j < batchTokens.length; j++) {
-        console.log('***batchResult3', i, j, batchResult[(i * batchTokens.length) + j])
         if(!matrix[j]){
           matrix[j] = []
         }
         matrix[j][i] = batchResult[(i * batchTokens.length) + j]
-        // if(!coins[j].batchAddresses){
-        //   coins[j].batchAddresses = []
-        // }
-        // let denominator = Math.pow(10, coins[j].decimals) 
-        // coins[j].batchAddresses[i] = matrix[j][i] / denominator
       }
     }
-    console.log('***batchResult4', {matrix, coins})
     var cid = 0
     setCoins([...coins].map((coin) => {
       if(!coin.tokenBalances){
@@ -294,39 +295,18 @@ function App() {
       let denominator = Math.pow(10, coin.decimals) 
       for (let i = 0; i < batchAddresses.length; i++) {
         let cell = matrix[cid][i]
-        // debugger
-        coin.tokenBalances[i] = cell.toNumber() / denominator 
-        console.log('***batchResult5', {cid, i, cell, coin})
+        let delimited
+        try{
+          delimited = parseInt(coin.decimals) === 18 ? parseFloat(ethers.utils.formatEther(cell)) : (cell.toNumber() / denominator)
+        }catch(e){
+          debugger
+        }
+        coin.tokenBalances[i] = delimited
       }
       cid = cid+1
       return coin
     }))
-    // for (let i = 0; i < batchAddresses.length; i++) {
-    //   for (let j = 0; j < coins.length; i++) {
-    //     let denominator = Math.pow(10, coins[j].decimals) 
-    //     let coin = coins[j]
-    //     let batchAddress = batchAddresses[i]
-    //     console.log('***', {i,j, denominator})
-    //     if(!coin.tokenBalances){
-    //       coin.tokenBalances = []
-    //     }
-    //     coins.tokenBalances[j] = matrix[j][i] / denominator
-    //   }
-    // }
     setCoins(coins)
-    // for (let i = 0; i < batchResult.length; i++) {
-    //   otherTokenBalance = batchResult[i];
-    //   setCoins((prevState) => {
-    //     let denominator = Math.pow(10, prevState[i].decimals) 
-    //     if(!prevState[i].tokenBalances){
-    //       prevState[i].tokenBalances = [otherTokenBalance / denominator]
-    //     }else{
-    //       prevState[i].tokenBalances.push(otherTokenBalance / denominator )
-    //     }
-    //     return prevState
-    //   })
-    //   setUpdate(new Date())
-    // }
   }
   const hasTokenBalances = coins.length === 0 || !!coins[0].tokenBalances
 
@@ -377,21 +357,8 @@ function App() {
     var tokenBalances = coins.map(c => {
       if(c.tokenBalances && c.tokenBalances[index]){
         var t = c.tokenBalances[index]
-        if(t == 0){
-          return 0
-        }else if(t < 10){
-          return 1
-        }else if(t < 1000){
-          return 10
-        }else if(t < 5000){
-          return 20
-        }else if(t < 10000){
-          return 50
-        }else if(t < 50000){
-          return 70
-        }else{
-          return 100
-        }
+        let usd = t * parseFloat(c.eth) * ethUsdPrice
+        return d3.scaleLog().domain([10,10000]).range([0,100])(usd)
       }else{
         return 0
       }
@@ -402,7 +369,7 @@ function App() {
     body.push(obj)
   }
   var colorLabels = d3.scaleOrdinal(d3.schemeCategory10).domain(body.map(b => b.name))
-  console.log('***', {coins, tokenOptions, ethUsdPrice, date:new Date()})
+  console.log('***body', {coins, body, tokenOptions, ethUsdPrice, date:new Date()})
   let search = new URLSearchParams(window.location.search)
   let initialCoins = (search.get('coins') && search.get('coins').split(',')) || []
   let initialAddresses = (search.get('addresses') && search.get('addresses').split(',')) || []
@@ -434,14 +401,24 @@ function App() {
         <div style={{textAlign:'center'}}>
           { coins.length > 0 && (
             <div>
-            <p>Try <a href="#" onClick={(e)=>console.log(e.target)}>alexmasmej.eth</a> , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
-            <input onChange={handleOtherAddress} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
+            <p>Try &nbsp;
+              <a href="#" onClick={handleAddressLink}>alexmasmej.eth</a> ,
+              <a href="#" onClick={handleAddressLink}>joonian.eth</a> ,
+              <a href="#" onClick={handleAddressLink}>flynnjamm.eth</a> ,
+              <a href="#" onClick={handleAddressLink}>vitalik.eth</a> ,
+              <a href="#" onClick={handleAddressLink}>ameen.eth</a> ,
+              <a href="#" onClick={handleAddressLink}>coopahtroopa.eth</a> ,
+               etc.
+               <p style={{paddingTop:'1em'}}>
+                 You can find more ENS names at <a href="https://explore.duneanalytics.com/dashboard/ens-reverse-record" target="_blank">Dune Analytics</a>&nbsp;
+                 or&nbsp;
+                 <a href="https://twitter.com/search?q=.eth&src=typed_query&f=user" target="_blank">Twitter</a>
+               </p>
+               <br/>You don't have ENS? Get it <a href="http://app.ens.domains" target="_blank">NOW</a></p>
+            <input onChange={(e)=> { handleOtherAddress(e.target.value) }} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
             {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
             <p>
               <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => {
-                console.log('*addresses1', addresses.length)
-                setAddresses([...addresses, ]);
-                console.log('*addresses2', addresses.length)
                 let newAddress = {name:otherName, address:otherAddress}
                 readOnChainData(newAddress)
               }}>

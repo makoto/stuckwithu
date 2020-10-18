@@ -74,7 +74,8 @@ export default function SpiderGraph({labels, body}) {
         },
         scale: {
           ticks: {
-            beginAtZero: true
+            beginAtZero: true,
+            min:0
           }
         }
       }
@@ -95,7 +96,9 @@ export default function SpiderGraph({labels, body}) {
       }
     }
     if (labels.length > coinLength) {
-      chart.data.labels.push(labels[labels.length - 1]);
+      console.log('***Spider1', {labels, datasets:datasets[0], body})
+      chart.data.labels = labels
+      console.log('***Spider1', {labelsLength:labels.length , coinLength})
       datasets.forEach(function(dataset) {
         dataset.data.push(randomScalingFactor());
       });
