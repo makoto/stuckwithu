@@ -417,6 +417,7 @@ const getTokenQuery = (address) => {
             </p>
             </div>
           )  }
+          <p style={{overflowX:"auto"}}>
           <table>
             <tr>
               <th></th>
@@ -447,6 +448,7 @@ const getTokenQuery = (address) => {
             )
           })}
           </table>
+          </p>
           {
             (true || hasTokenBalances) && (
               <p style={{width:'80%'}}>
