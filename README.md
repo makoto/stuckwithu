@@ -14,9 +14,10 @@ This project was bootstrapped with [Create Eth App](https://github.com/paulrberg
 ## TODO
 
 - Do not allow entering duplicate Address
-- Remove duplicate tokens
-- Support StakeWithMe
-- Support Coingecko https://www.coingecko.com/en?category_id=social-money&view=market
+- Use eth-balance-checker
+- Show total balances
+- Share token addresses
+- Share without connecting to Web3 modal
 
 ## Project Structure
 

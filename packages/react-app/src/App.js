@@ -35,6 +35,8 @@ const customStyles = {
 
 const d3 = require('d3')
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
+const BALANCE_CHECKER_ADDRESS = '0xb1f8e55c7f64d203c1400b9d8555d050f94adf39'
+
 function WalletButton({ provider, loadWeb3Modal }) {
   return (
     <Button
@@ -231,7 +233,7 @@ const getTokenQuery = (address) => {
   }, []);
 
   async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image }) {
-    let ceaErc20, defaultProvider
+    let defaultProvider
     if(token_address){
       let newCoin = {
         id: id.toLowerCase(),
@@ -243,13 +245,14 @@ const getTokenQuery = (address) => {
         tokenBalances: []
       }
       defaultProvider = getDefaultProvider();
-      ceaErc20 = new Contract(newCoin.token_address, abis.erc20, defaultProvider);
       let denominator = Math.pow(10, decimals)
-      for (let j = 0; j < addresses.length; j++) {
-        let newBalance = await ceaErc20.balanceOf(addresses[j].address)
-        newCoin.tokenBalances.push(newBalance / denominator)
-      }
+      const balanceChecker = new Contract(BALANCE_CHECKER_ADDRESS, abis.balanceChecker, defaultProvider);
+      const batchAddresses = addresses.map(a => a.address)
+      let batchResult = await balanceChecker.balances(batchAddresses, [newCoin.token_address]);
 
+      for (let j = 0; j < batchResult.length; j++) {
+        newCoin.tokenBalances.push(batchResult[j] / denominator)
+      }
       setCoins((prevState) => {
         return [...prevState, newCoin]
       })
@@ -262,12 +265,21 @@ const getTokenQuery = (address) => {
   async function readOnChainData() {
     const coinsWithAddress = coins.filter(c => c.token_address )
     const defaultProvider = getDefaultProvider();
-    let ceaErc20, tokenBalance, otherTokenBalance
+
+    const batchAddresses = [];
+    const batchTokens = [];
+    let otherTokenBalance
     setAddresses([...addresses, {name:otherName, address:otherAddress}]);
+    batchAddresses.push(otherAddress)
     for (let i = 0; i < coinsWithAddress.length; i++) {
       let coin = coinsWithAddress[i]
-      ceaErc20 = new Contract(coin.token_address, abis.erc20, defaultProvider);
-      otherTokenBalance = await ceaErc20.balanceOf(otherAddress);
+      batchTokens.push(coin.token_address)
+    }
+    const balanceChecker = new Contract(BALANCE_CHECKER_ADDRESS, abis.balanceChecker, defaultProvider);
+    let batchResult = await balanceChecker.balances(batchAddresses, batchTokens);
+    console.log('***batchResult', {batchResult})
+    for (let i = 0; i < batchResult.length; i++) {
+      otherTokenBalance = batchResult[i];
       setCoins((prevState) => {
         let denominator = Math.pow(10, prevState[i].decimals)
         if(!prevState[i].tokenBalances){
@@ -364,15 +376,6 @@ const getTokenQuery = (address) => {
         console.log(initialCoins[index])
         handleSearch(initialCoins[index])
       }
-    }else{
-      handleSearch('JOON')
-      handleSearch('JAMM')
-      handleSearch('ALEX')
-      handleSearch('rac')
-      handleSearch('coin')
-      handleSearch('CHERRY')
-      handleSearch('WHALE')
-      handleSearch('KARMA')
     }
   }
   const shareMessage = `https://twitter.com/intent/tweet?text=Do you own ${coins.map(c => `$${c.symbol}`).join(' ')}? Compare token balance with your friends at ${window.location.origin}/?coins=${coins.map(c => `${c.symbol}`).join(',')}`
@@ -382,25 +385,29 @@ const getTokenQuery = (address) => {
         <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} />
       </Header>
       <Body>
-        { !ens ? (
-          <Image src={logo} alt="react-logo" />
-        ) : (
+        { ens && coins.length > 0 ? (
           <SpiderGraph
             labels={labels}
             body={body}
           />
+        ) : (
+          <Image src={logo} alt="react-logo" />
         )}
         <h2>Stuck with U</h2>
         { ens ? (
         <>
-          <p>Try alexmasmej.eth , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
-          <input onChange={handleOtherAddress} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
-          {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
-          <p>
-            <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => readOnChainData(coins, addresses, otherAddress)}>
-            Add Token Balances
-            </Button>
-          </p>
+          { coins.length > 0 && (
+            <>
+            <p>Try alexmasmej.eth , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
+            <input onChange={handleOtherAddress} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
+            {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
+            <p>
+              <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => readOnChainData(coins, addresses, otherAddress)}>
+              Add Token Balances
+              </Button>
+            </p>
+            </>
+          )  }
           <table>
             <tr>
               <th></th>
@@ -434,7 +441,7 @@ const getTokenQuery = (address) => {
           {
             (true || hasTokenBalances) && (
               <p>
-                <h2>Add more tokens (sample:
+                <h2>Add Personal Tokens (sample:
                   <a href="#" onClick={addSampleTokens}>dao</a>,
                   <a href="#" onClick={addSampleTokens}>vc</a>,
                   <a href="#" onClick={addSampleTokens}>defi</a>,

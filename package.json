@@ -28,5 +28,8 @@
       "packages/*"
     ]
   },
-  "dependencies": {}
+  "dependencies": {
+    "eth-balance-checker": "^0.1.1",
+    "ethers": "^5.0.17"
+  }
 }
