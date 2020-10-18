@@ -417,7 +417,7 @@ const getTokenQuery = (address) => {
             </p>
             </div>
           )  }
-          <p style={{overflowX:"auto"}}>
+          <div style={{overflowX:"auto", width:"80%"}}>
           <table>
             <tr>
               <th></th>
@@ -425,7 +425,7 @@ const getTokenQuery = (address) => {
               {addresses.map((a) => {
                 return (
                   <th style={{color:colorLabels(a.name || a.address)}}>
-                    { a.name || (a.address && a.address.slice(0,5))}...  
+                    { a.name || (a.address && `${a.address.slice(0,5)}...`)}
                   </th>
                 )
               })}
@@ -448,7 +448,7 @@ const getTokenQuery = (address) => {
             )
           })}
           </table>
-          </p>
+          </div>
           {
             (true || hasTokenBalances) && (
               <p style={{width:'80%'}}>
