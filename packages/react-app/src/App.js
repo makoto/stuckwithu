@@ -16,19 +16,13 @@ import CreatableSelect from 'react-select/creatable'
 const customStyles = {
   option: (provided, state) => ({
     ...provided
-    // ,
-    // borderBottom: '1px dotted pink',
-    // color: state.isSelected ? 'red' : 'blue',
-    // padding: 20,
   }),
   control: () => ({
-    // none of react-select's styles are passed to <Control />
     width: 600,
   }),
   singleValue: (provided, state) => {
     const opacity = state.isDisabled ? 0.5 : 1;
     const transition = 'opacity 300ms';
-
     return { ...provided, opacity, transition };
   }
 }
@@ -113,7 +107,6 @@ function App() {
   const handleSearch = async(value) => {
     console.log('***handleSearc', {value, tokenOptions, date:new Date()})
     let selected, body
-    let msg
     if(!value.match(/^0x/)){
       body = tokenOptions.filter((t) => t.symbol.toLowerCase() === value.toLowerCase())[0]
       if(body){
@@ -169,32 +162,25 @@ function App() {
         body:query
     });
     return await res.json()
-};
+  };
 
-const getTokenQuery = (address) => {
-  return JSON.stringify({
-    operationName:"Token",
-    variables:{id:address},
-    query:`
-    query Token($id: String!){
-      tokens(where: {id:$id}) {
-        id
-        symbol
-        name
-        decimals
-        derivedETH
+  const getTokenQuery = (address) => {
+    return JSON.stringify({
+      operationName:"Token",
+      variables:{id:address},
+      query:`
+      query Token($id: String!){
+        tokens(where: {id:$id}) {
+          id
+          symbol
+          name
+          decimals
+          derivedETH
+        }
       }
-    }
-    `
-  });
-};
-
-  const handleToken = async(event) => {
-    console.log('handleToken', event)
-
-    let _value = event.target.value
-    setTokenSymbol(_value)
-  }
+      `
+    });
+  };
 
   const handleOtherAddress = async(event)=>{
     console.log('handleOtherAddress', event.target.value)
@@ -222,22 +208,15 @@ const getTokenQuery = (address) => {
   /* Open wallet selection modal. */
   const loadWeb3Modal = useCallback(async () => {
     const newProvider = await web3Modal.connect();
-    console.log('**loadWeb3Modal1', {networkVersion:newProvider.networkVersion, newProvider})
     let networkVersion = newProvider.networkVersion || 1
-    console.log('**loadWeb3Modal2', {networkVersion})
     const ensAddress = getEnsAddress(networkVersion)
-    console.log('**loadWeb3Modal3', {ensAddress})
     const selectedAddress = newProvider.selectedAddress || newProvider.accounts[0]
-    console.log('**loadWeb3Modal4', {selectedAddress})
     const _provider = new Web3Provider(newProvider)
-    console.log('**loadWeb3Modal5', {selectedAddress})
     const _ens = new ENS({ provider:newProvider, ensAddress })
-    console.log('**loadWeb3Modal6', {_ens})
     setProvider(_provider);
     setEns(_ens)
     setOtherAddress(selectedAddress);
     const { name } = await _ens.getName(selectedAddress)
-    console.log('**loadWeb3Modal7', {name, selectedAddress, _ens})
     setOtherName(name)
   }, []);
 
@@ -270,36 +249,84 @@ const getTokenQuery = (address) => {
     }
   }
 
-
-  async function readOnChainData() {
-    const coinsWithAddress = coins.filter(c => c.token_address )
+  async function readOnChainData(newAddress) {
     const defaultProvider = getDefaultProvider();
 
-    const batchAddresses = [];
+    let batchAddresses;
     const batchTokens = [];
     let otherTokenBalance
-    setAddresses([...addresses, {name:otherName, address:otherAddress}]);
-    batchAddresses.push(otherAddress)
-    for (let i = 0; i < coinsWithAddress.length; i++) {
-      let coin = coinsWithAddress[i]
+    console.log('***readOnChainData1', {length:addresses.length})
+    if(newAddress){
+      batchAddresses = addresses.map(a => a.address)  
+      batchAddresses.push(otherAddress)
+      setAddresses([...addresses, newAddress]);
+    }
+    for (let i = 0; i < coins.length; i++) {
+      let coin = coins[i]
       batchTokens.push(coin.token_address)
     }
+    console.log('***readOnChainData2', {length:addresses.length, batchAddresses, batchTokens})
     const balanceChecker = new Contract(BALANCE_CHECKER_ADDRESS, abis.balanceChecker, defaultProvider);
     let batchResult = await balanceChecker.balances(batchAddresses, batchTokens);
-    console.log('***batchResult', {batchResult})
-    for (let i = 0; i < batchResult.length; i++) {
-      otherTokenBalance = batchResult[i];
-      setCoins((prevState) => {
-        let denominator = Math.pow(10, prevState[i].decimals)
-        if(!prevState[i].tokenBalances){
-          prevState[i].tokenBalances = [otherTokenBalance / denominator]
-        }else{
-          prevState[i].tokenBalances.push(otherTokenBalance / denominator )
+    console.log('***batchResult1', {batchResult})
+    let matrix = []
+    for (let i = 0; i < batchAddresses.length; i++) {
+      console.log('***batchResult2', i)
+      for (let j = 0; j < batchTokens.length; j++) {
+        console.log('***batchResult3', i, j, batchResult[(i * batchTokens.length) + j])
+        if(!matrix[j]){
+          matrix[j] = []
         }
-        return prevState
-      })
-      setUpdate(new Date())
+        matrix[j][i] = batchResult[(i * batchTokens.length) + j]
+        // if(!coins[j].batchAddresses){
+        //   coins[j].batchAddresses = []
+        // }
+        // let denominator = Math.pow(10, coins[j].decimals) 
+        // coins[j].batchAddresses[i] = matrix[j][i] / denominator
+      }
     }
+    console.log('***batchResult4', {matrix, coins})
+    var cid = 0
+    setCoins([...coins].map((coin) => {
+      if(!coin.tokenBalances){
+        coin.tokenBalances = []
+      }
+      let denominator = Math.pow(10, coin.decimals) 
+      for (let i = 0; i < batchAddresses.length; i++) {
+        let cell = matrix[cid][i]
+        // debugger
+        coin.tokenBalances[i] = cell.toNumber() / denominator 
+        console.log('***batchResult5', {cid, i, cell, coin})
+      }
+      cid = cid+1
+      return coin
+    }))
+    // for (let i = 0; i < batchAddresses.length; i++) {
+    //   for (let j = 0; j < coins.length; i++) {
+    //     let denominator = Math.pow(10, coins[j].decimals) 
+    //     let coin = coins[j]
+    //     let batchAddress = batchAddresses[i]
+    //     console.log('***', {i,j, denominator})
+    //     if(!coin.tokenBalances){
+    //       coin.tokenBalances = []
+    //     }
+    //     coins.tokenBalances[j] = matrix[j][i] / denominator
+    //   }
+    // }
+    setCoins(coins)
+    // for (let i = 0; i < batchResult.length; i++) {
+    //   otherTokenBalance = batchResult[i];
+    //   setCoins((prevState) => {
+    //     let denominator = Math.pow(10, prevState[i].decimals) 
+    //     if(!prevState[i].tokenBalances){
+    //       prevState[i].tokenBalances = [otherTokenBalance / denominator]
+    //     }else{
+    //       prevState[i].tokenBalances.push(otherTokenBalance / denominator )
+    //     }
+    //     return prevState
+    //   })
+    //   setUpdate(new Date())
+    // }
   }
   const hasTokenBalances = coins.length === 0 || !!coins[0].tokenBalances
 
@@ -404,20 +431,26 @@ const getTokenQuery = (address) => {
         )}
         <h2>Stuck with U</h2>
         { ens ? (
-        <>
+        <div style={{textAlign:'center'}}>
           { coins.length > 0 && (
-            <div style={{width:'80%'}}>
-            <p>Try alexmasmej.eth , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
+            <div>
+            <p>Try <a href="#" onClick={(e)=>console.log(e.target)}>alexmasmej.eth</a> , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
             <input onChange={handleOtherAddress} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
             {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
             <p>
-              <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => readOnChainData(coins, addresses, otherAddress)}>
+              <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => {
+                console.log('*addresses1', addresses.length)
+                setAddresses([...addresses, ]);
+                console.log('*addresses2', addresses.length)
+                let newAddress = {name:otherName, address:otherAddress}
+                readOnChainData(newAddress)
+              }}>
               Add Token Balances
               </Button>
             </p>
             </div>
           )  }
-          <div style={{overflowX:"auto", width:"80%"}}>
+          <div style={{overflowX:"auto", width:"99%"}}>
           <table>
             <tr>
               <th></th>
@@ -451,7 +484,7 @@ const getTokenQuery = (address) => {
           </div>
           {
             (true || hasTokenBalances) && (
-              <p style={{width:'80%'}}>
+              <p>
                 <h2>Add Personal Tokens (sample:
                   <a href="#" onClick={addSampleTokens}>dao</a>,
                   <a href="#" onClick={addSampleTokens}>vc</a>,
@@ -478,7 +511,7 @@ const getTokenQuery = (address) => {
               </p>
             )
           }
-        </>
+        </div>
         ) : (
           <>
             <p>I'm stuck with $ALEX, stuck with $JAMM, stuck with $JOON</p>

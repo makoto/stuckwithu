@@ -15,8 +15,7 @@ This project was bootstrapped with [Create Eth App](https://github.com/paulrberg
 
 - Do not allow entering duplicate Address
 - Use eth-balance-checker
-- Show total balances
-- Share token addresses
+ - Share token addresses
 - Share without connecting to Web3 modal
 
 ## Project Structure
