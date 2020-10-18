@@ -222,13 +222,22 @@ const getTokenQuery = (address) => {
   /* Open wallet selection modal. */
   const loadWeb3Modal = useCallback(async () => {
     const newProvider = await web3Modal.connect();
-    const ensAddress = getEnsAddress(newProvider.networkVersion)
+    console.log('**loadWeb3Modal1', {networkVersion:newProvider.networkVersion, newProvider})
+    let networkVersion = newProvider.networkVersion || 1
+    console.log('**loadWeb3Modal2', {networkVersion})
+    const ensAddress = getEnsAddress(networkVersion)
+    console.log('**loadWeb3Modal3', {ensAddress})
+    const selectedAddress = newProvider.selectedAddress || newProvider.accounts[0]
+    console.log('**loadWeb3Modal4', {selectedAddress})
     const _provider = new Web3Provider(newProvider)
+    console.log('**loadWeb3Modal5', {selectedAddress})
     const _ens = new ENS({ provider:newProvider, ensAddress })
-    const { name } = await _ens.getName(newProvider.selectedAddress)
+    console.log('**loadWeb3Modal6', {_ens})
     setProvider(_provider);
     setEns(_ens)
-    setOtherAddress(newProvider.selectedAddress);
+    setOtherAddress(selectedAddress);
+    const { name } = await _ens.getName(selectedAddress)
+    console.log('**loadWeb3Modal7', {name, selectedAddress, _ens})
     setOtherName(name)
   }, []);
 

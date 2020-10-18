@@ -56,6 +56,7 @@
     "eject": "react-scripts eject",
     "ipfs": "yarn build && node scripts/ipfs.js",
     "start": "react-scripts start",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "deploy:dev": "surge build stuckwithu.surge.sh"
   }
 }
