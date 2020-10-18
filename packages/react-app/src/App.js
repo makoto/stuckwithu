@@ -406,7 +406,7 @@ const getTokenQuery = (address) => {
         { ens ? (
         <>
           { coins.length > 0 && (
-            <>
+            <div style={{width:'80%'}}>
             <p>Try alexmasmej.eth , joonian.eth , flynnjamm.eth, vitalik.eth , ljxie.eth, coopahtroopa.eth, etc. You don't have ENS? Get it <a href="http://app.ens.domains" >NOW</a></p>
             <input onChange={handleOtherAddress} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
             {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
@@ -415,7 +415,7 @@ const getTokenQuery = (address) => {
               Add Token Balances
               </Button>
             </p>
-            </>
+            </div>
           )  }
           <table>
             <tr>
@@ -449,7 +449,7 @@ const getTokenQuery = (address) => {
           </table>
           {
             (true || hasTokenBalances) && (
-              <p>
+              <p style={{width:'80%'}}>
                 <h2>Add Personal Tokens (sample:
                   <a href="#" onClick={addSampleTokens}>dao</a>,
                   <a href="#" onClick={addSampleTokens}>vc</a>,
