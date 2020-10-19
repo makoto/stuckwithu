@@ -6,7 +6,6 @@ import coinData from "./components/coins"
 import { Body, Button, Header, Image, Link } from "./components";
 import { web3Modal, logoutOfWeb3Modal } from './utils/web3Modal'
 import logo from "./logo.png";
-import ENS, { getEnsAddress, namehash } from '@ensdomains/ensjs'
 import { abis } from "@project/contracts";
 import GET_TRANSFERS from "./graphql/subgraph";
 import { BackgroundColor } from "chalk";
@@ -63,7 +62,6 @@ function App() {
   const [tokenSymbol, setTokenSymbol] = useState()
   const [tokenOptions, setTokenOptions] = useState([])
   const [ethUsdPrice, setEthUsdPrice] = useState()
-  const [ens, setEns] = useState();
 
   const addSampleTokens = async(e) =>{
     switch(e.target.text) {
@@ -201,7 +199,7 @@ function App() {
         _address = _value
       } else if(_value.match(/eth$/)){
         _name = _value
-        _address = await ens.name(_value).getAddress()
+        _address = await provider.resolveName(_value)
       }
     }catch(e){
       console.log(e)
@@ -214,18 +212,10 @@ function App() {
   
   /* Open wallet selection modal. */
   const loadWeb3Modal = useCallback(async () => {
-    const newProvider = await web3Modal.connect();
-    let networkVersion = newProvider.networkVersion
+    let readOnlyProvider = new ethers.getDefaultProvider('homestead')
+    let networkVersion = 1
     setNetworkId(parseInt(networkVersion))
-    const ensAddress = getEnsAddress(networkVersion)
-    const selectedAddress = newProvider.selectedAddress || newProvider.accounts[0]
-    const _provider = new Web3Provider(newProvider)
-    const _ens = new ENS({ provider:newProvider, ensAddress })
-    setProvider(_provider);
-    setEns(_ens)
-    // setOtherAddress(selectedAddress);
-    // const { name } = await _ens.getName(selectedAddress)
-    // setOtherName(name)
+    setProvider(readOnlyProvider);
   }, []);
 
   async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image }) {
@@ -339,11 +329,12 @@ function App() {
         setEthUsdPrice(d.ethereum.usd)
       })
     })
-
+    
     if (web3Modal.cachedProvider) {
       console.log('***web3Modal1')
       loadWeb3Modal();
     }else{
+      loadWeb3Modal()
       console.log('***web3Modal2')
     }
   }, [loadWeb3Modal]);
@@ -371,7 +362,7 @@ function App() {
   let search = new URLSearchParams(window.location.search)
   let initialCoins = (search.get('coins') && search.get('coins').split(',')) || []
   let initialAddresses = (search.get('addresses') && search.get('addresses').split(',')) || []
-  if(ens){
+  if(provider){
     if(tokenOptions.length > 0 && coins.length === 0){
       if(initialCoins.length > 0){
         for (var index = 0; index < initialCoins.length; ++index) {
@@ -408,10 +399,9 @@ function App() {
   return (
     <div>
       <Header>
-        <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} />
       </Header>
       <Body>
-        { ens && coins.length > 0 && networkId === 1 ? (
+        { provider && coins.length > 0 && networkId === 1 ? (
           <SpiderGraph
             labels={labels}
             body={body}
@@ -420,7 +410,7 @@ function App() {
           <Image src={logo} alt="react-logo" />
         )}
         <h2>Stuck with U</h2>
-        { ens && networkId === 1 ? (
+        { provider && networkId === 1 ? (
         <div style={{textAlign:'center'}}>
           { coins.length > 0 && (
             <div>
