@@ -191,7 +191,7 @@ function App() {
   }
 
   const handleOtherAddress = async(value)=>{
-    console.log('handleOtherAddress', value)
+    console.log('****handleOtherAddress2.1', value)
     let _value = value.trim()
     let _address = EMPTY_ADDRESS
     let _name
@@ -203,14 +203,10 @@ function App() {
         _address = await ens.name(_value).getAddress()
       }
     }catch(e){
+      console.log('***2.2', e)
       console.log(e)
     }
-    if(_name){
-      setOtherName(_name)
-    }
-    if(_address){
-      setOtherAddress(_address)
-    }
+    console.log('***2.3', {_name, _address})
     return({
       name:_name,
       address:_address
@@ -227,9 +223,9 @@ function App() {
     const _ens = new ENS({ provider:newProvider, ensAddress })
     setProvider(_provider);
     setEns(_ens)
-    setOtherAddress(selectedAddress);
-    const { name } = await _ens.getName(selectedAddress)
-    setOtherName(name)
+    // setOtherAddress(selectedAddress);
+    // const { name } = await _ens.getName(selectedAddress)
+    // setOtherName(name)
   }, []);
 
   async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image }) {
@@ -344,7 +340,10 @@ function App() {
     })
 
     if (web3Modal.cachedProvider) {
+      console.log('***web3Modal1')
       loadWeb3Modal();
+    }else{
+      console.log('***web3Modal2')
     }
   }, [loadWeb3Modal]);
 
@@ -371,21 +370,25 @@ function App() {
   let search = new URLSearchParams(window.location.search)
   let initialCoins = (search.get('coins') && search.get('coins').split(',')) || []
   let initialAddresses = (search.get('addresses') && search.get('addresses').split(',')) || []
-  if(tokenOptions.length > 0 && coins.length === 0){
-    if(initialCoins.length > 0){
-      for (var index = 0; index < initialCoins.length; ++index) {
-        handleSearch(initialCoins[index])
+  if(ens){
+    if(tokenOptions.length > 0 && coins.length === 0){
+      if(initialCoins.length > 0){
+        for (var index = 0; index < initialCoins.length; ++index) {
+          console.log('****handleSearch')
+          handleSearch(initialCoins[index])
+        }
       }
     }
-  }
-  if(coins.length === initialCoins.length && initialAddresses.length > addresses.length){
-    for (var index = 0; index < initialAddresses.length; ++index) {
-      Promise.all(initialAddresses.map(a => {
-        return handleOtherAddress(a)
-      })).then((_addresses)=> {
-        readOnChainData(_addresses)
-      })
-    }
+    if(coins.length === initialCoins.length && initialAddresses.length > addresses.length){
+      console.log('****handleOtherAddress', coins.length , initialCoins.length , initialAddresses.length , addresses.length)
+      for (var index = 0; index < initialAddresses.length; ++index) {
+        Promise.all(initialAddresses.map(a => {
+          return handleOtherAddress(a)
+        })).then((_addresses)=> {
+          readOnChainData(_addresses)
+        })
+      }
+    }  
   }
 
   let shareText, twitterSharingURL
@@ -433,7 +436,16 @@ function App() {
                  <a href="https://twitter.com/search?q=.eth&src=typed_query&f=user" target="_blank">Twitter</a>
                </p>
                <br/>You don't have ENS? Get it <a href="http://app.ens.domains" target="_blank">NOW</a></p>
-            <input onChange={(e)=> { handleOtherAddress(e.target.value) }} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
+            <input onChange={(e)=> {
+              handleOtherAddress(e.target.value).then(({name, address})=>{
+                if(name){
+                  setOtherName(name)
+                }
+                if(address){
+                  setOtherAddress(address)
+                }
+              })
+            }} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
             {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
             <p>
               <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => {
