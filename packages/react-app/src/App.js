@@ -186,7 +186,7 @@ function App() {
 
   const handleAddressLink = async(e)=>{
     handleOtherAddress(e.target.text).then((a)=> {
-      readOnChainData(a)
+      readOnChainData([a])
     })
   }
 
@@ -261,16 +261,14 @@ function App() {
     }
   }
 
-  async function readOnChainData(newAddress) {
+  async function readOnChainData(newAddresses) {
     const defaultProvider = getDefaultProvider();
 
     let batchAddresses;
     const batchTokens = [];
-    let otherTokenBalance
-    if(newAddress){
-      batchAddresses = addresses.map(a => a.address)  
-      batchAddresses.push(newAddress.address)
-      setAddresses([...addresses, newAddress]);
+    if(newAddresses && newAddresses.length > 0){
+      batchAddresses = [...addresses.map(a => a.address), ...newAddresses.map(a => a.address)]
+      setAddresses([...addresses, ...newAddresses]);
     }
     for (let i = 0; i < coins.length; i++) {
       let coin = coins[i]
@@ -376,12 +374,32 @@ function App() {
   if(tokenOptions.length > 0 && coins.length === 0){
     if(initialCoins.length > 0){
       for (var index = 0; index < initialCoins.length; ++index) {
-        console.log(initialCoins[index])
         handleSearch(initialCoins[index])
       }
     }
   }
-  const shareMessage = `https://twitter.com/intent/tweet?text=Do you own ${coins.map(c => `$${c.symbol}`).join(' ')}? Compare token balance with your friends at ${window.location.origin}/?coins=${coins.map(c => `${c.symbol}`).join(',')}`
+  if(coins.length === initialCoins.length && initialAddresses.length > addresses.length){
+    for (var index = 0; index < initialAddresses.length; ++index) {
+      Promise.all(initialAddresses.map(a => {
+        return handleOtherAddress(a)
+      })).then((_addresses)=> {
+        readOnChainData(_addresses)
+      })
+    }
+  }
+
+  let shareText, twitterSharingURL
+  if(addresses.length === 0){
+    shareText = `Do you own ${coins.map(c => `$${c.symbol}`).join(' ')}? Compare token balance with your friends`
+    twitterSharingURL = `${window.location.origin}/?coins=${coins.map(c => c.symbol).join(',')}`
+  }else{
+    const query = `coins=${coins.map(c => `${c.symbol}`).join(',')}&addresses=${addresses.map(c => c.name).join(',')}`
+    twitterSharingURL = `${window.location.origin}/?${query}`;
+    shareText = `${addresses.map(a => `${a.name}`).join(' ')} are stuck with ${coins.map(c => `$${c.symbol}`).join(' ')}. Check it out`
+  }
+  console.log('***twitterSharingURL', encodeURIComponent(twitterSharingURL))
+  let shareMessage = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(twitterSharingURL)}`
+
   return (
     <div>
       <Header>
@@ -420,7 +438,7 @@ function App() {
             <p>
               <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => {
                 let newAddress = {name:otherName, address:otherAddress}
-                readOnChainData(newAddress)
+                readOnChainData([newAddress])
               }}>
               Add Token Balances
               </Button>
