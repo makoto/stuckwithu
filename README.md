@@ -13,10 +13,10 @@ This project was bootstrapped with [Create Eth App](https://github.com/paulrberg
 
 ## TODO
 
+- Suggest new tokens
+- Suggest common addresses
 - Do not allow entering duplicate Address
-- Use eth-balance-checker
- - Share token addresses
-- Share without connecting to Web3 modal
+- Come up with interesting ways to show which combinations are better
 
 ## Project Structure
 

@@ -119,7 +119,7 @@ function App() {
           image: body.logo  
         }  
       }else{
-        setErrorMessage('No matching token for the symbol')
+        // setErrorMessage('No matching token for the symbol')
         return false
       }
     }else{
@@ -358,7 +358,6 @@ function App() {
     body.push(obj)
   }
   var colorLabels = d3.scaleOrdinal(d3.schemeCategory10).domain(body.map(b => b.name))
-  console.log('***body', {coins, body, tokenOptions, ethUsdPrice, date:new Date()})
   let search = new URLSearchParams(window.location.search)
   let initialCoins = (search.get('coins') && search.get('coins').split(',')) || []
   let initialAddresses = (search.get('addresses') && search.get('addresses').split(',')) || []
@@ -366,13 +365,11 @@ function App() {
     if(tokenOptions.length > 0 && coins.length === 0){
       if(initialCoins.length > 0){
         for (var index = 0; index < initialCoins.length; ++index) {
-          console.log('****handleSearch')
           handleSearch(initialCoins[index])
         }
       }
     }
     if(coins.length === initialCoins.length && initialAddresses.length > addresses.length){
-      console.log('****handleOtherAddress', coins.length , initialCoins.length , initialAddresses.length , addresses.length)
       for (var index = 0; index < initialAddresses.length; ++index) {
         Promise.all(initialAddresses.map(a => {
           return handleOtherAddress(a)
@@ -383,25 +380,17 @@ function App() {
     }  
   }
 
-  let shareText, twitterSharingURL
-  if(addresses.length === 0){
-    shareText = `Do you own ${coins.map(c => `$${c.symbol}`).join(' ')}? Compare token balance with your friends`
-    twitterSharingURL = `${window.location.origin}/?coins=${coins.map(c => c.symbol).join(',')}`
-  }else{
-    const query = `coins=${coins.map(c => `${c.symbol}`).join(',')}&addresses=${addresses.map(c => c.name).join(',')}`
-    twitterSharingURL = `${window.location.origin}/?${query}`;
-    shareText = `${addresses.map(a => `${a.name}`).join(' ')} are stuck with ${coins.map(c => `$${c.symbol}`).join(' ')}. Check it out`
-  }
-  console.log('***twitterSharingURL', encodeURIComponent(twitterSharingURL))
-  let shareMessage = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(twitterSharingURL)}`
-  console.log('****provider', {provider, networkId})
+  const query = `coins=${coins.map(c => `${c.symbol}`).join(',')}&addresses=${addresses.map(c => c.name).join(',')}`
+  const twitterSharingURL = `${window.location.origin}/?${query}`;
+  const shareText = `${addresses.map(a => `${a.name}`).join(' ')} are stuck with ${coins.map(c => `$${c.symbol}`).join(' ')}. Check out the personal token stuck`
+  const shareMessage = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(twitterSharingURL)}`
 
   return (
     <div>
       <Header>
       </Header>
       <Body>
-        { provider && coins.length > 0 && networkId === 1 ? (
+        { provider && coins.length > 2 && networkId === 1 ? (
           <SpiderGraph
             labels={labels}
             body={body}
@@ -412,8 +401,70 @@ function App() {
         <h2>Stuck with U</h2>
         { provider && networkId === 1 ? (
         <div style={{textAlign:'center'}}>
-          { coins.length > 0 && (
+          <div style={{overflowX:"auto", width:"99%"}}>
+          <p>Tokens are the new social graph. Discover who holds which personal tokens.</p>
+          <table>
+            <tr>
+              <th></th>
+              <th></th>
+              {addresses.map((a) => {
+                return (
+                  <th style={{color:colorLabels(a.name || a.address)}}>
+                    { a.name || (a.address && `${a.address.slice(0,5)}...`)}
+                  </th>
+                )
+              })}
+            </tr>
+            {coins.map((c) => {
+            return(
+              <tr>
+                <td><img width="50px" src={c.image}></img></td>
+                <td>{c.symbol}</td>
+                {c && c.tokenBalances && c.tokenBalances.map((b) => {
+                  return (
+                    <td>
+                      { parseInt(b) }
+                      {c.eth && `($${parseInt(b * parseFloat(c.eth) * ethUsdPrice)})`}
+                    </td>
+                  )
+                })}
+
+              </tr>
+            )
+          })}
+          </table>
+          </div>
+          {
+            hasTokenBalances && (
+              <p>
+                <h2>Step 1: Add Personal Tokens (sample:
+                  <a href="#" onClick={addSampleTokens}>dao</a>,
+                  <a href="#" onClick={addSampleTokens}>vc</a>,
+                  <a href="#" onClick={addSampleTokens}>defi</a>,
+                  <a href="#" onClick={addSampleTokens}>media</a>,
+                  <a href="#" onClick={addSampleTokens}>entertainer</a>,
+                  <a href="#" onClick={addSampleTokens}>game</a>,
+                  <a href="#" onClick={addSampleTokens}>art</a>
+                )</h2>
+                <p style={{color:'red'}}>{errorMessage}</p>
+                <CreatableSelect
+                styles={customStyles}
+                components={{ Option: IconOption }}
+                options={tokenOptions} onChange={(e) => { handleSearch(e.value)}} search={true} name="language" placeholder="Select token or add token address"
+                />
+                {
+                  (coins.length > 0 && coins.length < 3) && (
+                    <p style={{color:'red'}}>Please add at least 3 tokens to go to next step</p>
+                  )
+                }
+              </p>
+            )
+          }
+          { coins.length > 2 && (
             <div>
+            <p>
+              <h2>Step2: Add addresses to show token balances</h2>
+            </p>
             <p>Try &nbsp;
               <a href="#" onClick={handleAddressLink}>alexmasmej.eth</a> ,
               <a href="#" onClick={handleAddressLink}>joonian.eth</a> ,
@@ -449,67 +500,15 @@ function App() {
             </p>
             </div>
           )  }
-          <div style={{overflowX:"auto", width:"99%"}}>
-          <table>
-            <tr>
-              <th></th>
-              <th></th>
-              {addresses.map((a) => {
-                return (
-                  <th style={{color:colorLabels(a.name || a.address)}}>
-                    { a.name || (a.address && `${a.address.slice(0,5)}...`)}
-                  </th>
-                )
-              })}
-            </tr>
-            {coins.map((c) => {
-            return(
-              <tr>
-                <td><img width="50px" src={c.image}></img></td>
-                <td>{c.symbol}</td>
-                {c && c.tokenBalances && c.tokenBalances.map((b) => {
-                  return (
-                    <td>
-                      { parseInt(b) }
-                      {c.eth && `($${parseInt(b * parseFloat(c.eth) * ethUsdPrice)})`}
-                    </td>
-                  )
-                })}
-
-              </tr>
-            )
-          })}
-          </table>
-          </div>
-          {
-            (true || hasTokenBalances) && (
-              <p>
-                <h2>Add Personal Tokens (sample:
-                  <a href="#" onClick={addSampleTokens}>dao</a>,
-                  <a href="#" onClick={addSampleTokens}>vc</a>,
-                  <a href="#" onClick={addSampleTokens}>defi</a>,
-                  <a href="#" onClick={addSampleTokens}>media</a>,
-                  <a href="#" onClick={addSampleTokens}>entertainer</a>,
-                  <a href="#" onClick={addSampleTokens}>game</a>,
-                  <a href="#" onClick={addSampleTokens}>art</a>
-                )</h2>
-                <p style={{color:'red'}}>{errorMessage}</p>
-                <CreatableSelect
-                styles={customStyles}
-                components={{ Option: IconOption }}
-                options={tokenOptions} onChange={(e) => { handleSearch(e.value)}} search={true} name="language" placeholder="Select token or add token address"
-                />
-                {coins.length > 0 && (
-                  <>
-                    <h3>Did you find your favorite personal token combos?</h3>
+                {coins.length > 0 && addresses.length > 0 && (
+                  <p>
+                    <h2> Step 3: Share your discovery</h2>
                     <a class="twitter-share-button"
                       href={shareMessage}>
-                    Tweet Your favorite personal tokens</a>
-                  </>
+                    Tweet</a>
+                  </p>
                 )}
-              </p>
-            )
-          }
+
         </div>
         ) : (
           <>
