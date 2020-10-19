@@ -8,6 +8,14 @@
        "logo": "https://pbs.twimg.com/profile_images/1255616684624232451/IrjYmlGs_400x400.jpg"
     },
     {
+      "label": "EVAN",
+      "symbol":"EVAN",
+      "name":"Evan",
+      "contractAddress": "0x89e3ac6dd69c15e9223be7649025d6f68dab1d6a",
+      "decimals": 18,
+      "logo": "https://assets.coingecko.com/coins/images/12078/small/8NERB6Pc_400x400.jpg"
+   },
+    {
       "label": "JAKE",
       "symbol": "jake",
       "name": "Jake Brukhman",
