@@ -53,6 +53,7 @@ function WalletButton({ provider, loadWeb3Modal }) {
 function App() {
   const { loading, error, data } = useQuery(GET_TRANSFERS);
   const [provider, setProvider] = useState();
+  const [networkId, setNetworkId] = useState();
   const [addresses, setAddresses] = useState([]);
   const [otherAddress, setOtherAddress] = useState();
   const [errorMessage, setErrorMessage] = useState();
@@ -203,10 +204,8 @@ function App() {
         _address = await ens.name(_value).getAddress()
       }
     }catch(e){
-      console.log('***2.2', e)
       console.log(e)
     }
-    console.log('***2.3', {_name, _address})
     return({
       name:_name,
       address:_address
@@ -216,7 +215,8 @@ function App() {
   /* Open wallet selection modal. */
   const loadWeb3Modal = useCallback(async () => {
     const newProvider = await web3Modal.connect();
-    let networkVersion = newProvider.networkVersion || 1
+    let networkVersion = newProvider.networkVersion
+    setNetworkId(parseInt(networkVersion))
     const ensAddress = getEnsAddress(networkVersion)
     const selectedAddress = newProvider.selectedAddress || newProvider.accounts[0]
     const _provider = new Web3Provider(newProvider)
@@ -244,6 +244,7 @@ function App() {
       let denominator = Math.pow(10, decimals)
       const balanceChecker = new Contract(BALANCE_CHECKER_ADDRESS, abis.balanceChecker, defaultProvider);
       const batchAddresses = addresses.map(a => a.address)
+      console.log('***batchAddresses', {batchAddresses})
       let batchResult = await balanceChecker.balances(batchAddresses, [newCoin.token_address]);
 
       for (let j = 0; j < batchResult.length; j++) {
@@ -402,6 +403,7 @@ function App() {
   }
   console.log('***twitterSharingURL', encodeURIComponent(twitterSharingURL))
   let shareMessage = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(twitterSharingURL)}`
+  console.log('****provider', {provider, networkId})
 
   return (
     <div>
@@ -409,7 +411,7 @@ function App() {
         <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} />
       </Header>
       <Body>
-        { ens && coins.length > 0 ? (
+        { ens && coins.length > 0 && networkId === 1 ? (
           <SpiderGraph
             labels={labels}
             body={body}
@@ -418,7 +420,7 @@ function App() {
           <Image src={logo} alt="react-logo" />
         )}
         <h2>Stuck with U</h2>
-        { ens ? (
+        { ens && networkId === 1 ? (
         <div style={{textAlign:'center'}}>
           { coins.length > 0 && (
             <div>
@@ -523,6 +525,9 @@ function App() {
           <>
             <p>I'm stuck with $ALEX, stuck with $JAMM, stuck with $JOON</p>
             <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} />
+            {
+              networkId !== 1 && (<p style={{color:"red"}}>Please connect to Mainnet</p>)
+            }
           </>
         )}
       </Body>
