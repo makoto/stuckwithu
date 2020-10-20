@@ -347,7 +347,14 @@ function App() {
       if(c.tokenBalances && c.tokenBalances[index]){
         var t = c.tokenBalances[index]
         let usd = t * parseFloat(c.eth) * ethUsdPrice
-        return d3.scaleLog().domain([10,10000]).range([0,100])(usd)
+        if(usd > 10000){
+          return 100
+        }else if (usd < 1){
+          return 1
+        }
+        else{
+          return d3.scaleLog().domain([10,10000]).range([0,100])(usd)
+        }
       }else{
         return 0
       }
