@@ -81,9 +81,11 @@ function App() {
         await handleSearch('JAMM')
         break;
       case 'dao':
-        await handleSearch('pew')
+        await handleSearch('$pew')
         await handleSearch('PETER')
         await handleSearch('ALEX')
+        await handleSearch('RCLE')
+        await handleSearch('MAGIC')
         break;
       case 'entertainer':
         await handleSearch('rac')
@@ -481,6 +483,7 @@ function App() {
               <a href="#" onClick={handleAddressLink}>flynnjamm.eth</a> ,
               <a href="#" onClick={handleAddressLink}>vitalik.eth</a> ,
               <a href="#" onClick={handleAddressLink}>ameen.eth</a> ,
+              <a href="#" onClick={handleAddressLink}>pet3rpan.eth</a> ,
               <a href="#" onClick={handleAddressLink}>coopahtroopa.eth</a> ,
                etc.
                <p style={{paddingTop:'1em'}}>

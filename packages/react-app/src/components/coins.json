@@ -8,6 +8,22 @@
        "logo": "https://pbs.twimg.com/profile_images/1255616684624232451/IrjYmlGs_400x400.jpg"
     },
     {
+      "label": "MAGIC",
+      "symbol":"MAGIC",
+      "name":"Peter Pan",
+      "contractAddress": "0x51876a15aff97a68ed7df051ce11fade0b91b384",
+      "decimals": 1,
+      "logo": "https://roll-token.s3.amazonaws.com/PETER/ea7bb96a-032c-4cf5-9d7a-42cba77fb5af"
+   },
+   {
+      "label": "RCLE",
+      "symbol":"RCLE",
+      "name":"Ross Campbell",
+      "contractAddress": "0x5a844590c5b8f40ae56190771d06c60b9ab1da1c",
+      "decimals": 18,
+      "logo": "https://pbs.twimg.com/profile_images/1282777186898976769/-EXDMuDF_400x400.jpg"
+   },
+   {
       "label": "EVAN",
       "symbol":"EVAN",
       "name":"Evan",
