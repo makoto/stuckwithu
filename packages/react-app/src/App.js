@@ -396,7 +396,10 @@ function App() {
             body={body}
           />
         ) : (
-          <Image src={logo} alt="react-logo" />
+          <>
+            <Image src={logo} alt="react-logo" />
+            <iframe width="50" height="50" src="https://www.youtube.com/embed/h2jvHynuMjI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </>
         )}
         <h2>Stuck with U</h2>
         { provider && networkId === 1 ? (
