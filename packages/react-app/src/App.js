@@ -544,7 +544,7 @@ function App() {
               <a href="#" onClick={handleAddressLink}>coopahtroopa.eth</a> ,
                etc.
                <p style={{paddingTop:'1em'}}>
-                 You can find more ENS names at <a href="https://explore.duneanalytics.com/dashboard/ens-reverse-record" target="_blank">Dune Analytics</a>&nbsp;
+                 You can find more ENS names at <a href="https://explore.duneanalytics.com/public/dashboards/7y5anMQVu38kAL4x95qFlFCDTXLHXKhmNBJd5CD7" target="_blank">Dune Analytics</a>&nbsp;
                  or&nbsp;
                  <a href="https://twitter.com/search?q=.eth&src=typed_query&f=user" target="_blank">Twitter</a>
                </p>
