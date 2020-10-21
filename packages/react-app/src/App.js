@@ -13,6 +13,7 @@ import SpiderGraph from './SpiderGraph'
 import { components } from "react-select";
 import CreatableSelect from 'react-select/creatable'
 import { ethers } from 'ethers';
+import _ from 'lodash';
 
 const customStyles = {
   option: (provided, state) => ({
@@ -77,6 +78,7 @@ function App() {
       case 'media':
         await handleSearch('JOON')
         await handleSearch('CAMI')
+        await handleSearch('KARMA')
         await handleSearch('EVAN')
         await handleSearch('JAMM')
         break;
@@ -99,7 +101,6 @@ function App() {
         break;
       case 'defi':
         await handleSearch('STANI')
-        await handleSearch('KARMA')
         await handleSearch('JULIEN')
         await handleSearch('DUDE')
         await handleSearch('MARC')
@@ -220,6 +221,16 @@ function App() {
     setProvider(readOnlyProvider);
   }, []);
 
+  function getMatched(balances, eth, ethUsdPrice){
+    let sorted = balances.map(b => {
+      return parseInt(b * parseFloat(eth || 0) * ethUsdPrice)
+    }).filter((b) => b > 0).sort()
+    return {
+      matchedLength: sorted.length,
+      matchedMin: sorted[0]
+    }
+  }
+
   async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image }) {
     let defaultProvider
     if(token_address){
@@ -230,7 +241,8 @@ function App() {
         decimals,
         image,
         eth,
-        tokenBalances: []
+        tokenBalances: [],
+
       }
       defaultProvider = getDefaultProvider();
       let denominator = Math.pow(10, decimals)
@@ -391,9 +403,12 @@ function App() {
 
   const query = `coins=${coins.map(c => `${c.symbol}`).join(',')}&addresses=${addresses.map(c => c.name).join(',')}`
   const twitterSharingURL = `${window.location.origin}/?${query}`;
-  const shareText = `${addresses.map(a => `${a.name}`).join(' ')} are stuck with ${coins.map(c => `$${c.symbol}`).join(' ')}. Check out the personal token stuck`
+  const shareText = `${addresses.map(a => `${a.name}`).join(' ')} are stuck with ${
+    coins.map(c => `${ c.symbol.match(/\$/) ? '' : '$' }${c.symbol}`).join(' ')
+  }. Check out the personal token stuck`
   const shareMessage = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(twitterSharingURL)}`
-
+  
+  const modifiedCoins = coins.map(c => {return({...c, ...getMatched(c.tokenBalances, c.eth, ethUsdPrice)})})
   return (
     <div>
       <Header>
@@ -427,11 +442,11 @@ function App() {
                 )
               })}
             </tr>
-            {coins.map((c) => {
+            {_.orderBy(modifiedCoins, ['matchedLength', 'matchedMin'], ['desc', 'desc']).map((c, index) => {
             return(
-              <tr>
+              <tr style={{textAlign:'left'}}>
                 <td><img width="50px" src={c.image}></img></td>
-                <td>{c.symbol}</td>
+                <td>{index + 1}:{c.symbol}</td>
                 {c && c.tokenBalances && c.tokenBalances.map((b) => {
                   return (
                     <td>
