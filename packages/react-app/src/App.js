@@ -61,10 +61,12 @@ function App() {
   const [coins, setCoins] = useState([]);
   const [update, setUpdate] = useState(new Date())
   const [tokenSymbol, setTokenSymbol] = useState()
+  const [suggestions, setSuggestions] = useState([])
   const [tokenOptions, setTokenOptions] = useState([])
   const [ethUsdPrice, setEthUsdPrice] = useState()
 
   const addSampleTokens = async(e) =>{
+    e.preventDefault()
     switch(e.target.text) {
       case 'art':
         await handleSearch('SKULL')
@@ -186,9 +188,40 @@ function App() {
     });
   };
 
+  const fetchSuggestions = async(name) => {
+    fetch(`https://api.covalenthq.com/v1/1/address/${name}/balances/?key=ckey_125f8d62ef8b4410a92c2787d6c`).then((data) =>{
+      data.json().then((d)=>{
+        let tokenBalances = d.data.balances.map(c => { return {
+          symbol:c.contract_ticker_symbol.toLowerCase(),
+          token_address: c.contract_address.toLowerCase(),
+          balance:c.balance
+        }})
+        let tokenOptionModified = tokenOptions.map(c => { return {
+          symbol:c.symbol.toLowerCase(), token_address:c.contractAddress
+        }})
+        let intersection = _.intersectionBy(
+          tokenBalances,
+          tokenOptionModified,
+          'symbol'
+        )
+        let difference = _.differenceBy(intersection, coins, 'token_address')
+        setSuggestions(difference.map(d => d.symbol))
+      })
+    })
+  }
+
+  const handleTokenLink = async(e)=>{
+    e.preventDefault()
+    let symbol = e.target.text
+    handleSearch(symbol)
+  }
+
   const handleAddressLink = async(e)=>{
-    handleOtherAddress(e.target.text).then((a)=> {
+    e.preventDefault()
+    let name = e.target.text
+    handleOtherAddress(name).then((a)=> {
       readOnChainData([a])
+      fetchSuggestions(name)
     })
   }
 
@@ -296,7 +329,7 @@ function App() {
         let cell = matrix[cid][i]
         let delimited
         try{
-          delimited = parseInt(coin.decimals) === 18 ? parseFloat(ethers.utils.formatEther(cell)) : (cell.toNumber() / denominator)
+          delimited = parseFloat(coin.decimals) === 18 ? parseFloat(ethers.utils.formatEther(cell)) : (cell.toNumber() / denominator)
         }catch(e){
           debugger
         }
@@ -408,6 +441,8 @@ function App() {
   }. Check out the personal token stuck`
   const shareMessage = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(twitterSharingURL)}`
   
+  let displyableSuggestions = _.difference(suggestions, coins.map(c => c.symbol.toLowerCase()))
+
   const modifiedCoins = coins.map(c => {return({...c, ...getMatched(c.tokenBalances, c.eth, ethUsdPrice)})})
   return (
     <div>
@@ -450,7 +485,7 @@ function App() {
                 {c && c.tokenBalances && c.tokenBalances.map((b) => {
                   return (
                     <td>
-                      { parseInt(b) }
+                      { (b > 0 && b < 1) ? 0.1 : parseInt(b) }
                       {c.eth && `($${parseInt(b * parseFloat(c.eth) * ethUsdPrice)})`}
                     </td>
                   )
@@ -487,6 +522,13 @@ function App() {
               </p>
             )
           }
+            {displyableSuggestions.length > 0 && (<span>suggestions</span>)}
+            {displyableSuggestions.map(s => {
+              return (
+                <span style={{margin:'5px'}}><a onClick={handleTokenLink} href="#">{s}</a></span>
+              )
+            })}
+
           { coins.length > 2 && (
             <div>
             <p>
@@ -510,6 +552,7 @@ function App() {
             <input onChange={(e)=> {
               handleOtherAddress(e.target.value).then(({name, address})=>{
                 if(name){
+                  fetchSuggestions(name)
                   setOtherName(name)
                 }
                 if(address){
@@ -519,8 +562,12 @@ function App() {
             }} placeholder="Enter ENS name or Eth address" defaultValue={otherName || otherAddress}></input>
             {otherAddress === EMPTY_ADDRESS ? (<p style={{color:'red'}}>Invalid address</p>) : (<p>{otherAddress}</p>)}
             <p>
-              <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={() => {
+              <Button disabled = {otherAddress === EMPTY_ADDRESS} onClick={(e) => {
+                e.preventDefault()
                 let newAddress = {name:otherName, address:otherAddress}
+                if(otherName){
+                  fetchSuggestions(name)
+                }
                 readOnChainData([newAddress])
               }}>
               Add Token Balances
