@@ -127,7 +127,9 @@ function App() {
           symbol: body.symbol.toLowerCase(),
           token_address: body.contractAddress.toLowerCase(),
           decimals: body.decimals,
-          image: body.logo  
+          image: body.logo,
+          website:body.website,
+          platform:body.platform
         }  
       }else{
         // setErrorMessage('No matching token for the symbol')
@@ -222,19 +224,21 @@ function App() {
     e.preventDefault()
     let symbol = e.target.text
     let coin = coins.filter(a => a.symbol === symbol.toLowerCase())[0]
+    console.log({coin})
     setTokenDetail(coin)
     openModal()
     if(!tokenHolders[symbol]){
       let data = await fetch(`https://api.covalenthq.com/v1/1/tokens/${coin.token_address}/token_holders?key=${C_KEY}`)
       let d = await data.json()
       let obj = {}
+      obj[symbol] = {}
       console.log('***d.data.items', d.data)
-      obj[symbol] = d.data.items.slice(0,10)
+      obj[symbol].items = d.data.items.slice(0,10)
       setTokenHolders({...tokenHolders, ...obj})
       setSpinnerMessage('Lookingup ENS....')
-      for (let i = 0; i < obj[symbol].length; i++) {
+      for (let i = 0; i < obj[symbol].items.length; i++) {
         console.log('***toggleModal4', {i})
-        let item = obj[symbol][i]
+        let item = obj[symbol].items[i]
         console.log('***toggleModal5')
         let name = await provider.lookupAddress(item.address)
         console.log('***toggleModal6', name)
@@ -317,7 +321,7 @@ function App() {
     }
   }
 
-  async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image, name }) {
+  async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image, name, website, platform }) {
     let defaultProvider
     if(token_address){
       let newCoin = {
@@ -328,7 +332,9 @@ function App() {
         image,
         eth,
         tokenBalances: [],
-        name
+        name,
+        website,
+        platform
       }
       defaultProvider = getDefaultProvider('homestead', {infura:NODE_KEY});
       let denominator = Math.pow(10, decimals)
@@ -420,9 +426,12 @@ function App() {
   useEffect(() => {
     fetch(`https://api.tryroll.com/v2/tokens`).then((data) =>{
       data.json().then((d)=>{
-        console.log({d})
+        let enhanced = d.map(dd => {
+          dd.platform = 'tryroll'
+          return dd
+        })
         setTokenOptions(
-          [...coinData,...d].map((dd) => { return {
+          [...coinData,...enhanced].map((dd) => { return {
             ...dd,
             value:dd.symbol,
             label:dd.symbol
@@ -539,9 +548,9 @@ function App() {
               <img style={{width:"100px", margin:'1.5em' }} src={tokenDetail.image}></img>
               <h2>Whales (top 10 token holders)</h2>
               { spinnerMessage && (<div style = {{color:"orange"}}>{spinnerMessage}</div>)}
-              { tokenHolders[tokenDetail.symbol] && (
+              { tokenHolders[tokenDetail.symbol] && tokenHolders[tokenDetail.symbol].items && (
                 <ul>
-                  {tokenHolders[tokenDetail.symbol].slice(0, 20).map(h => {
+                  {tokenHolders[tokenDetail.symbol].items.slice(0, 20).map(h => {
                   let percent = parseInt(h.balance) / parseInt(h.total_supply) * 100
                   let denominator = Math.pow(10, tokenDetail.decimals)
                   return (

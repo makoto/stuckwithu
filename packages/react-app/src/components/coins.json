@@ -5,6 +5,7 @@
        "name":"ameen",
        "contractAddress": "0x892091bDd49FE955859D4bbB8a9A2B7685CCec82",
        "decimals": 18,
+       "platform": "byo",
        "logo": "https://pbs.twimg.com/profile_images/1255616684624232451/IrjYmlGs_400x400.jpg"
     },
     {
@@ -13,6 +14,7 @@
       "name":"Peter Pan",
       "contractAddress": "0x51876a15aff97a68ed7df051ce11fade0b91b384",
       "decimals": 1,
+      "platform": "byo",
       "logo": "https://roll-token.s3.amazonaws.com/PETER/ea7bb96a-032c-4cf5-9d7a-42cba77fb5af"
    },
    {
@@ -21,6 +23,7 @@
       "name":"Ross Campbell",
       "contractAddress": "0x5a844590c5b8f40ae56190771d06c60b9ab1da1c",
       "decimals": 18,
+      "platform": "byo",
       "logo": "https://pbs.twimg.com/profile_images/1282777186898976769/-EXDMuDF_400x400.jpg"
    },
    {
@@ -29,6 +32,7 @@
       "name":"Evan",
       "contractAddress": "0x89e3ac6dd69c15e9223be7649025d6f68dab1d6a",
       "decimals": 18,
+      "platform": "byo",
       "logo": "https://assets.coingecko.com/coins/images/12078/small/8NERB6Pc_400x400.jpg"
    },
     {
@@ -38,6 +42,7 @@
       "cateory": "vc",
       "contractAddress": "0x277697fa7c134a7fcc2aaaf812bdf1fd8b68b818",
       "decimals": 18,
+      "platform": "stakeonme",
       "logo":"https://ipfs.io/ipfs/QmSQUvWszwqxfZUAMkGaEkk9u3K5Cj4mun9ZuiTGeZ4tTU"
     },
     {
@@ -45,6 +50,7 @@
       "symbol":"rac",
       "name":"rac",
       "contractAddress": "0xc22b30e4cce6b78aaaadae91e44e73593929a3e9",
+      "platform": "zora",
       "logo":"https://assets.coingecko.com/coins/images/12675/large/rac_logo_%281%29.jpg?1601526417",
       "decimals":18
    },
@@ -53,6 +59,7 @@
       "symbol":"coin",
       "name":"Coin Artist",
       "contractAddress": "0x87b008e57f640d94ee44fd893f0323af933f9195",
+      "platform": "byo",
       "logo":"https://assets.coingecko.com/coins/images/12375/small/coin_artist_logo.png?1599403918",
       "decimals":18
    }
