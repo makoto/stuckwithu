@@ -13,6 +13,8 @@ import SpiderGraph from './SpiderGraph'
 import { components } from "react-select";
 import CreatableSelect from 'react-select/creatable'
 import { ethers } from 'ethers';
+import Modal from 'react-modal';
+
 import _ from 'lodash';
 
 const customStyles = {
@@ -32,7 +34,8 @@ const customStyles = {
 const d3 = require('d3')
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 const BALANCE_CHECKER_ADDRESS = '0xb1f8e55c7f64d203c1400b9d8555d050f94adf39'
-
+const NODE_KEY = '63c463ac9dff4296ac5ac483aa660138'
+const C_KEY = 'ckey_125f8d62ef8b4410a92c2787d6c'
 function WalletButton({ provider, loadWeb3Modal }) {
   return (
     <Button
@@ -49,7 +52,6 @@ function WalletButton({ provider, loadWeb3Modal }) {
   );
 }
 
-
 function App() {
   const { loading, error, data } = useQuery(GET_TRANSFERS);
   const [provider, setProvider] = useState();
@@ -64,6 +66,10 @@ function App() {
   const [suggestions, setSuggestions] = useState([])
   const [tokenOptions, setTokenOptions] = useState([])
   const [ethUsdPrice, setEthUsdPrice] = useState()
+  const [modalIsOpen,setIsOpen] = useState(false);
+  const [tokenDetail, setTokenDetail] = useState({});
+  const [tokenHolders, setTokenHolders] = useState({});
+  const [spinnerMessage, setSpinnerMessage] = useState();
 
   const addSampleTokens = async(e) =>{
     e.preventDefault()
@@ -143,7 +149,8 @@ function App() {
         symbol: token.symbol,
         token_address: token.id,
         eth: token.derivedETH,
-        decimals: token.decimals
+        decimals: token.decimals,
+        name:token.name
       }}
     }
 
@@ -189,8 +196,9 @@ function App() {
   };
 
   const fetchSuggestions = async(name) => {
-    fetch(`https://api.covalenthq.com/v1/1/address/${name}/balances/?key=ckey_125f8d62ef8b4410a92c2787d6c`).then((data) =>{
+    fetch(`https://api.covalenthq.com/v1/1/address/${name}/balances/?key=${C_KEY}`).then((data) =>{
       data.json().then((d)=>{
+        console.log('***fetchSuggestions', {name, d})
         let tokenBalances = d.data.balances.map(c => { return {
           symbol:c.contract_ticker_symbol.toLowerCase(),
           token_address: c.contract_address.toLowerCase(),
@@ -210,6 +218,45 @@ function App() {
     })
   }
 
+  const toggleModal = async(e)=>{
+    e.preventDefault()
+    let symbol = e.target.text
+    let coin = coins.filter(a => a.symbol === symbol.toLowerCase())[0]
+    setTokenDetail(coin)
+    openModal()
+    if(!tokenHolders[symbol]){
+      let data = await fetch(`https://api.covalenthq.com/v1/1/tokens/${coin.token_address}/token_holders?key=${C_KEY}`)
+      let d = await data.json()
+      let obj = {}
+      obj[symbol] = d.data.items.slice(0,10)
+      setTokenHolders({...tokenHolders, ...obj})
+      setSpinnerMessage('Lookingup ENS....')
+      for (let i = 0; i < obj[symbol].length; i++) {
+        console.log('***toggleModal4', {i})
+        let item = obj[symbol][i]
+        console.log('***toggleModal5')
+        let name = await provider.lookupAddress(item.address)
+        console.log('***toggleModal6', name)
+        console.log({address:item.address, name})
+        item.name = name
+        setTokenHolders({...tokenHolders, ...obj})
+      }
+      setSpinnerMessage(false)
+    }
+  }
+  const openModal = ()=>{
+    setIsOpen(true);
+  }
+
+  const afterOpenModal = () => {
+    // references are now sync'd and can be accessed.
+    // subtitle.style.color = '#f00';
+  }
+
+  const closeModal = () =>{
+    setIsOpen(false);
+  }
+
   const handleTokenLink = async(e)=>{
     e.preventDefault()
     let symbol = e.target.text
@@ -223,6 +270,11 @@ function App() {
       readOnChainData([a])
       fetchSuggestions(name)
     })
+  }
+
+  const closeAndAddAddress = async(e)=>{
+    closeModal()
+    handleAddressLink(e)
   }
 
   const handleOtherAddress = async(value)=>{
@@ -248,7 +300,7 @@ function App() {
   
   /* Open wallet selection modal. */
   const loadWeb3Modal = useCallback(async () => {
-    let readOnlyProvider = new ethers.getDefaultProvider('homestead')
+    let readOnlyProvider = new ethers.getDefaultProvider('homestead', {infura:NODE_KEY})
     let networkVersion = 1
     setNetworkId(parseInt(networkVersion))
     setProvider(readOnlyProvider);
@@ -264,7 +316,7 @@ function App() {
     }
   }
 
-  async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image }) {
+  async function lookupTokenSymbol({id, symbol, eth, token_address, decimals, image, name }) {
     let defaultProvider
     if(token_address){
       let newCoin = {
@@ -275,9 +327,9 @@ function App() {
         image,
         eth,
         tokenBalances: [],
-
+        name
       }
-      defaultProvider = getDefaultProvider();
+      defaultProvider = getDefaultProvider('homestead', {infura:NODE_KEY});
       let denominator = Math.pow(10, decimals)
       const balanceChecker = new Contract(BALANCE_CHECKER_ADDRESS, abis.balanceChecker, defaultProvider);
       const batchAddresses = addresses.map(a => a.address)
@@ -442,7 +494,7 @@ function App() {
   const shareMessage = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(twitterSharingURL)}`
   
   let displyableSuggestions = _.difference(suggestions, coins.map(c => c.symbol.toLowerCase()))
-
+  console.log('***', {tokenHolders})
   const modifiedCoins = coins.map(c => {return({...c, ...getMatched(c.tokenBalances, c.eth, ethUsdPrice)})})
   return (
     <div>
@@ -460,6 +512,41 @@ function App() {
             <iframe width="50" height="50" src="https://www.youtube.com/embed/h2jvHynuMjI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </>
         )}
+        <Modal
+          isOpen={modalIsOpen}
+          onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          style={{}}
+          contentLabel="Example Modal"
+        >
+          <Button onClick={closeModal}>Close Modal</Button>
+          {tokenDetail && (
+            <div>
+              <h2>
+              {
+                tokenDetail.symbol
+              }
+              { tokenDetail.name && <>({tokenDetail.name})</> }
+              </h2>
+              <h2>Whales (top 10 token holders)</h2>
+              { spinnerMessage && (<div style = {{color:"orange"}}>{spinnerMessage}</div>)}
+              { tokenHolders[tokenDetail.symbol] && (
+                <ul>
+                  {tokenHolders[tokenDetail.symbol].slice(0, 20).map(h => {
+                  let percent = parseInt(h.balance) / parseInt(h.total_supply) * 100
+                  let denominator = Math.pow(10, tokenDetail.decimals)
+                  return (
+                    <li style={{margin:'1em'}}>{ h.name ? (
+                      <a href="#" onClick={closeAndAddAddress}>{h.name}</a>
+                    ) : `${h.address.slice(0,5)}...`}: { (h.balance / denominator).toFixed(3) } ({percent.toFixed(3)} %) </li>
+                  )
+                })}
+                </ul>
+              )}
+              { !spinnerMessage && (<div style = {{color:"green"}}>Click ENS name to show token balances</div>)}
+            </div>
+          )}
+        </Modal>
         <h2>Stuck with U</h2>
         { provider && networkId === 1 ? (
         <div style={{textAlign:'center'}}>
@@ -481,7 +568,7 @@ function App() {
             return(
               <tr style={{textAlign:'left'}}>
                 <td><img width="50px" src={c.image}></img></td>
-                <td>{index + 1}:{c.symbol}</td>
+                <td>{index + 1}<a href="#" onClick={toggleModal}>{c.symbol}</a></td>
                 {c && c.tokenBalances && c.tokenBalances.map((b) => {
                   return (
                     <td>
@@ -522,12 +609,14 @@ function App() {
               </p>
             )
           }
-            {displyableSuggestions.length > 0 && (<span>suggestions</span>)}
+          {displyableSuggestions.length > 0 && (<div style={{wordWrap:'break-word', width:'800px'}}>
+            <span>suggestions</span>
             {displyableSuggestions.map(s => {
-              return (
-                <span style={{margin:'5px'}}><a onClick={handleTokenLink} href="#">{s}</a></span>
-              )
-            })}
+            return (
+              <span style={{margin:'5px'}}><a onClick={handleTokenLink} href="#">{s}</a></span>
+            )
+          })}
+          </div>)}
 
           { coins.length > 2 && (
             <div>
