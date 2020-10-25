@@ -1,6 +1,8 @@
 
 # Stuck with u
 
+- [Demo video](https://www.youtube.com/watch?v=_qrDg6wTLrE)
+
 a social network on top of existing social tokens.
 
 - Whitelist of existing social tokens
@@ -9,7 +11,9 @@ a social network on top of existing social tokens.
 
 [Inspiration](https://twitter.com/Flynnjamm/status/1313182142935883776)
 
+
 ![](./tweet.png)
+
 
 ## APIs used
 
@@ -30,4 +34,5 @@ a social network on top of existing social tokens.
 - Support other Personal Token platforms (Rally/StakeOnMe)
 - Add more recommendation feature (eg: Cosine Similarity)
 - Show when your friends bought/sold/transferred tokens
+- Speed up/Cache ENS lookup
 
