@@ -82,3 +82,15 @@ table{
 .twitter-share-button:hover {
   background-position: 0 -21px;
 }
+
+
+
+.link-button {
+  background-color: #49cc90;
+  color: white;
+  padding: 0.2em;
+  border: none;
+  border-radius: 2px;
+  margin:5px;
+  text-decoration: none;
+}

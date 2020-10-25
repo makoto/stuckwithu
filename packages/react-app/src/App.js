@@ -538,7 +538,7 @@ function App() {
                   let denominator = Math.pow(10, tokenDetail.decimals)
                   return (
                     <li style={{margin:'1em'}}>{ h.name ? (
-                      <a href="#" onClick={closeAndAddAddress}>{h.name}</a>
+                      <a className='link-button' href="#" onClick={closeAndAddAddress}>{h.name}</a>
                     ) : `${h.address.slice(0,5)}...`}: { (h.balance / denominator).toFixed(3) } ({percent.toFixed(3)} %) </li>
                   )
                 })}
@@ -588,13 +588,13 @@ function App() {
             hasTokenBalances && (
               <p>
                 <h2>Step 1: Add Personal Tokens (sample:
-                  <a href="#" onClick={addSampleTokens}>dao</a>,
-                  <a href="#" onClick={addSampleTokens}>vc</a>,
-                  <a href="#" onClick={addSampleTokens}>defi</a>,
-                  <a href="#" onClick={addSampleTokens}>media</a>,
-                  <a href="#" onClick={addSampleTokens}>entertainer</a>,
-                  <a href="#" onClick={addSampleTokens}>game</a>,
-                  <a href="#" onClick={addSampleTokens}>art</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>dao</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>vc</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>defi</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>media</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>entertainer</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>game</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>art</a>
                 )</h2>
                 <p style={{color:'red'}}>{errorMessage}</p>
                 <CreatableSelect
@@ -610,14 +610,14 @@ function App() {
               </p>
             )
           }
-          {displyableSuggestions.length > 0 && (<div style={{wordWrap:'break-word', width:'800px'}}>
-            <span>suggestions</span>
+          {displyableSuggestions.length > 0 && (<p style={{wordWrap:'break-word', width:'800px'}}>
+            <span style={{ fontWeight:'bold' }}>suggestions</span>
             {displyableSuggestions.map(s => {
             return (
-              <span style={{margin:'5px'}}><a onClick={handleTokenLink} href="#">{s}</a></span>
+              <span><a className='link-button' onClick={handleTokenLink} href="#">{s}</a></span>
             )
           })}
-          </div>)}
+          </p>)}
 
           { coins.length > 2 && (
             <div>
@@ -625,13 +625,13 @@ function App() {
               <h2>Step2: Add addresses to show token balances</h2>
             </p>
             <p>Try &nbsp;
-              <a href="#" onClick={handleAddressLink}>alexmasmej.eth</a> ,
-              <a href="#" onClick={handleAddressLink}>joonian.eth</a> ,
-              <a href="#" onClick={handleAddressLink}>flynnjamm.eth</a> ,
-              <a href="#" onClick={handleAddressLink}>vitalik.eth</a> ,
-              <a href="#" onClick={handleAddressLink}>ameen.eth</a> ,
-              <a href="#" onClick={handleAddressLink}>pet3rpan.eth</a> ,
-              <a href="#" onClick={handleAddressLink}>coopahtroopa.eth</a> ,
+              <a className='link-button' href="#" onClick={handleAddressLink}>alexmasmej.eth</a>
+              <a className='link-button' href="#" onClick={handleAddressLink}>joonian.eth</a>
+              <a className='link-button' href="#" onClick={handleAddressLink}>flynnjamm.eth</a>
+              <a className='link-button' href="#" onClick={handleAddressLink}>vitalik.eth</a>
+              <a className='link-button' href="#" onClick={handleAddressLink}>ameen.eth</a>
+              <a className='link-button' href="#" onClick={handleAddressLink}>pet3rpan.eth</a>
+              <a className='link-button' href="#" onClick={handleAddressLink}>coopahtroopa.eth</a>
                etc.
                <p style={{paddingTop:'1em'}}>
                  You can find more ENS names at <a href="https://explore.duneanalytics.com/public/dashboards/7y5anMQVu38kAL4x95qFlFCDTXLHXKhmNBJd5CD7" target="_blank">Dune Analytics</a>&nbsp;
