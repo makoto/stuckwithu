@@ -528,6 +528,7 @@ function App() {
               }
               { tokenDetail.name && <>({tokenDetail.name})</> }
               </h2>
+              <img style={{width:"100px", margin:'1.5em' }} src={tokenDetail.image}></img>
               <h2>Whales (top 10 token holders)</h2>
               { spinnerMessage && (<div style = {{color:"orange"}}>{spinnerMessage}</div>)}
               { tokenHolders[tokenDetail.symbol] && (
