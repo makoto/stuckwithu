@@ -32,6 +32,7 @@
     "apollo-utilities": "^1.3.3",
     "chalk": "^4.1.0",
     "chart.js": "^2.9.3",
+    "compute-cosine-similarity": "^1.0.0",
     "d3": "^6.2.0",
     "d3-scale-chromatic": "^2.0.0",
     "eslint": "^6.8.0",
@@ -60,5 +61,8 @@
     "start": "react-scripts start",
     "test": "react-scripts test",
     "deploy:dev": "surge build stuckwithu.surge.sh"
+  },
+  "devDependencies": {
+    "node-fetch": "^2.6.1"
   }
 }

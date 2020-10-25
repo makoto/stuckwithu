@@ -228,6 +228,7 @@ function App() {
       let data = await fetch(`https://api.covalenthq.com/v1/1/tokens/${coin.token_address}/token_holders?key=${C_KEY}`)
       let d = await data.json()
       let obj = {}
+      console.log('***d.data.items', d.data)
       obj[symbol] = d.data.items.slice(0,10)
       setTokenHolders({...tokenHolders, ...obj})
       setSpinnerMessage('Lookingup ENS....')
