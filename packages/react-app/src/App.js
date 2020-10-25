@@ -349,6 +349,13 @@ function App() {
   }
 
   async function readOnChainData(newAddresses) {
+    console.log({coins})
+    if(
+      addresses.map(a => a.address).includes(newAddresses[0].address) ||
+      addresses.map(a => a.name).includes(newAddresses[0].name) 
+    ){
+      return false
+    }
     const defaultProvider = getDefaultProvider();
 
     let batchAddresses;
@@ -588,14 +595,15 @@ function App() {
           {
             hasTokenBalances && (
               <p>
-                <h2>Step 1: Add Personal Tokens (sample:
-                  <a className='link-button' href="#" onClick={addSampleTokens}>dao</a>
+                <h2>Step 1: Add Personal Tokens
+                   {/* (sample: */}
+                  {/* <a className='link-button' href="#" onClick={addSampleTokens}>dao</a>
                   <a className='link-button' href="#" onClick={addSampleTokens}>vc</a>
                   <a className='link-button' href="#" onClick={addSampleTokens}>defi</a>
                   <a className='link-button' href="#" onClick={addSampleTokens}>media</a>
                   <a className='link-button' href="#" onClick={addSampleTokens}>entertainer</a>
                   <a className='link-button' href="#" onClick={addSampleTokens}>game</a>
-                  <a className='link-button' href="#" onClick={addSampleTokens}>art</a>
+                  <a className='link-button' href="#" onClick={addSampleTokens}>art</a> */}
                 )</h2>
                 <p style={{color:'red'}}>{errorMessage}</p>
                 <CreatableSelect
@@ -605,7 +613,7 @@ function App() {
                 />
                 {
                   (coins.length > 0 && coins.length < 3) && (
-                    <p style={{color:'red'}}>Please add at least 3 tokens to go to next step</p>
+                    <p style={{color:'red'}}>Please add at least 3 tokens to go to show a graph</p>
                   )
                 }
               </p>
@@ -625,7 +633,7 @@ function App() {
             <p>
               <h2>Step2: Add addresses to show token balances</h2>
             </p>
-            <p>Try &nbsp;
+            <p style={{width:'800px'}}>Try &nbsp;
               <a className='link-button' href="#" onClick={handleAddressLink}>alexmasmej.eth</a>
               <a className='link-button' href="#" onClick={handleAddressLink}>joonian.eth</a>
               <a className='link-button' href="#" onClick={handleAddressLink}>flynnjamm.eth</a>
@@ -659,6 +667,7 @@ function App() {
                 if(otherName){
                   fetchSuggestions(name)
                 }
+                console.log({coins})
                 readOnChainData([newAddress])
               }}>
               Add Token Balances
@@ -666,7 +675,7 @@ function App() {
             </p>
             </div>
           )  }
-                {coins.length > 0 && addresses.length > 0 && (
+                {coins.length > 2 && addresses.length > 0 && (
                   <p>
                     <h2> Step 3: Share your discovery</h2>
                     <a class="twitter-share-button"
