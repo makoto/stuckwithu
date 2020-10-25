@@ -9,21 +9,25 @@ a social network on top of existing social tokens.
 
 [Inspiration](https://twitter.com/Flynnjamm/status/1313182142935883776)
 
-## APIs in Use
+![](./tweet.png)
 
-### TryRoll
+## APIs used
 
-- Get list of transactions
+### [TryRoll](https://docs.tryroll.com)
 
-### Subgraph
+- Get list of tokens
+
+### [Subgraph](https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2)
 
 - Retrieve current Uniswap price
 
-###
+### [Covalenthq](https://www.covalenthq.com/)
 
-## Todo 
+- Retrieve token holdings
+
+## Todo
 
 - Support other Personal Token platforms (Rally/StakeOnMe)
-- Add more recommendation feature
-- 
+- Add more recommendation feature (eg: Cosine Similarity)
+- Show when your friends bought/sold/transferred tokens
 
