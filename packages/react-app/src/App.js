@@ -238,9 +238,7 @@ function App() {
       setTokenHolders({...tokenHolders, ...obj})
       setSpinnerMessage('Lookingup ENS and NFT assets')
       for (let i = 0; i < obj[symbol].items.length; i++) {
-        console.log('***toggleModal4', {i})
         let item = obj[symbol].items[i]
-        console.log('***toggleModal5')
         let name = await provider.lookupAddress(item.address)
         let asset = (await (await fetch(`https://api.opensea.io/api/v1/assets?owner=${item.address}&order_direction=desc&offset=0&limit=10`)).json()).assets
         obj[symbol].assets[i] = asset
@@ -272,11 +270,16 @@ function App() {
 
   const handleAddressLink = async(e)=>{
     e.preventDefault()
-    let name = e.target.text
-    handleOtherAddress(name).then((a)=> {
-      readOnChainData([a])
+    let name = e.target.text || e.target.textContent
+    if(name.match(/^0x/)){
+      readOnChainData([{address:name}])
       fetchSuggestions(name)
-    })
+    }else{
+      handleOtherAddress(name).then((a)=> {
+        readOnChainData([a])
+        fetchSuggestions(name)
+      })
+    }
   }
 
   const closeAndAddAddress = async(e)=>{
@@ -357,7 +360,6 @@ function App() {
   }
 
   async function readOnChainData(newAddresses) {
-    console.log({coins})
     if(
       addresses.map(a => a.address).includes(newAddresses[0].address) ||
       addresses.map(a => a.name).includes(newAddresses[0].name) 
@@ -559,8 +561,10 @@ function App() {
                   console.log('****asset', i, tokenDetail.symbol, tokenHolders[tokenDetail.symbol])
                   return (
                     <li style={{margin:'1em'}}>{ h.name ? (
-                      <a className='link-button' href="#" onClick={closeAndAddAddress}>{h.name}</a>
-                    ) : `${h.address.slice(0,5)}...`}: { (h.balance / denominator).toFixed(3) } ({percent.toFixed(3)} %)
+                      <a className='link-button' href="#" onClick={closeAndAddAddress}>{h.name }</a>
+                    ) : (
+                      <a className='link-button' style={{overflow: 'hidden', textOverflow:'ellipsis', width:'100px', display:'block'}} href="#" onClick={closeAndAddAddress}>{ h.address }</a>
+                    )}: { (h.balance / denominator).toFixed(3) } ({percent.toFixed(3)} %)
                     { asset && asset.length > 0 && (<p>
                       { asset.map(a => {
                       return(
@@ -575,7 +579,7 @@ function App() {
                 })}
                 </ul>
               )}
-              { !spinnerMessage && (<div style = {{color:"green"}}>Click ENS name to show token balances</div>)}
+              { !spinnerMessage && (<div style = {{color:"green"}}>Click green button to show token balances</div>)}
             </div>
           )}
         </Modal>
