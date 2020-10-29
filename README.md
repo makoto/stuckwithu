@@ -32,6 +32,12 @@ Link to a live demo or working Project.
 
 - [stuckwithu.eth.link](https://stuckwithu.eth.link)
 
+## Anything else you’d like to add?
+
+I wrote a blog post about personal token related data I discovered while building the dapp. Please have a read!
+
+- https://makoto-inoue.medium.com/tokens-are-the-new-social-graph-5206f7c4185b
+
 ## APIs used
 
 ### [TryRoll](https://docs.tryroll.com)
