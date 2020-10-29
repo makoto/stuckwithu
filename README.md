@@ -1,6 +1,11 @@
 
 # Stuck with u
 
+Tokens are the new social graph. Discover who holds which personal tokens
+
+![](./image.png)
+
+
 ## Team
 
 - [@makoto_inoue](https://twitter.com/@makoto_inoue)
