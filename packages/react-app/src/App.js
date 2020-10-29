@@ -234,15 +234,17 @@ function App() {
       obj[symbol] = {}
       console.log('***d.data.items', d.data)
       obj[symbol].items = d.data.items.slice(0,10)
+      obj[symbol].assets = new Array(d.data.items.slice(0,10).length)
       setTokenHolders({...tokenHolders, ...obj})
-      setSpinnerMessage('Lookingup ENS....')
+      setSpinnerMessage('Lookingup ENS and NFT assets')
       for (let i = 0; i < obj[symbol].items.length; i++) {
         console.log('***toggleModal4', {i})
         let item = obj[symbol].items[i]
         console.log('***toggleModal5')
         let name = await provider.lookupAddress(item.address)
-        console.log('***toggleModal6', name)
-        console.log({address:item.address, name})
+        let asset = (await (await fetch(`https://api.opensea.io/api/v1/assets?owner=${item.address}&order_direction=desc&offset=0&limit=10`)).json()).assets
+        obj[symbol].assets[i] = asset
+        console.log({address:item.address, asset, asset2:obj[symbol].assets[i]})
         item.name = name
         setTokenHolders({...tokenHolders, ...obj})
       }
@@ -550,13 +552,25 @@ function App() {
               { spinnerMessage && (<div style = {{color:"orange"}}>{spinnerMessage}</div>)}
               { tokenHolders[tokenDetail.symbol] && tokenHolders[tokenDetail.symbol].items && (
                 <ul>
-                  {tokenHolders[tokenDetail.symbol].items.slice(0, 20).map(h => {
+                  {tokenHolders[tokenDetail.symbol].items.slice(0, 20).map((h, i) => {
                   let percent = parseInt(h.balance) / parseInt(h.total_supply) * 100
                   let denominator = Math.pow(10, tokenDetail.decimals)
+                  let asset = tokenHolders[tokenDetail.symbol].assets[i]
+                  console.log('****asset', i, tokenDetail.symbol, tokenHolders[tokenDetail.symbol])
                   return (
                     <li style={{margin:'1em'}}>{ h.name ? (
                       <a className='link-button' href="#" onClick={closeAndAddAddress}>{h.name}</a>
-                    ) : `${h.address.slice(0,5)}...`}: { (h.balance / denominator).toFixed(3) } ({percent.toFixed(3)} %) </li>
+                    ) : `${h.address.slice(0,5)}...`}: { (h.balance / denominator).toFixed(3) } ({percent.toFixed(3)} %)
+                    { asset && asset.length > 0 && (<p>
+                      { asset.map(a => {
+                      return(
+                          <a href={a.external_link || a.permalink } target="_blank">
+                            <img width="30px" src={a.image_thumbnail_url} />
+                          </a>
+                        )
+                      }) }
+                    </p>)}
+                    </li>
                   )
                 })}
                 </ul>
