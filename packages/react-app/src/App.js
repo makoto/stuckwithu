@@ -563,7 +563,13 @@ function App() {
                     <li style={{margin:'1em'}}>{ h.name ? (
                       <a className='link-button' href="#" onClick={closeAndAddAddress}>{h.name }</a>
                     ) : (
-                      <a className='link-button' style={{overflow: 'hidden', textOverflow:'ellipsis', width:'100px', display:'block'}} href="#" onClick={closeAndAddAddress}>{ h.address }</a>
+                      <a className='link-button' style={{
+                        overflow: 'hidden',
+                        textOverflow:'ellipsis',
+                        width:'100px',
+                        display:'inline-block',
+                        verticalAlign: 'middle'
+                      }} href="#" onClick={closeAndAddAddress}>{ h.address }</a>
                     )}: { (h.balance / denominator).toFixed(3) } ({percent.toFixed(3)} %)
                     { asset && asset.length > 0 && (<p>
                       { asset.map(a => {
