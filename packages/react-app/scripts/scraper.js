@@ -1,3 +1,4 @@
+const ethers =require('ethers').ethers;
 const fetch = require("node-fetch");
 const C_KEY = 'ckey_125f8d62ef8b4410a92c2787d6c'
 const TRYROL_ROLL_URL = 'https://api.tryroll.com/v2/tokens'
@@ -7,6 +8,7 @@ const fs = require('fs');
 const { map } = require("lodash");
 const _ = require('lodash')
 var similarity = require( 'compute-cosine-similarity' );
+const NODE_KEY = '63c463ac9dff4296ac5ac483aa660138'
 
 const fetchTokenholders = async (token_address) => {
     let pageNumber = 0
@@ -79,12 +81,17 @@ const main = async() => {
   all_coins = await getAllCoins()
   let stats = []
   let addresses = {}
+  let readOnlyProvider = new ethers.getDefaultProvider('homestead', {infura:NODE_KEY})
+
   for (let i = 0; i < all_coins.length; i++) {
   // for (let i = 0; i < 10; i++) {
     all_coins[i]
     let coin = all_coins[i]
     // console.log('Fetching', {i, symbol:coin.symbol})
     let items = await getTokenholders(coin.token_address)
+    if(coin.symbol === 'CALVIN'){
+      console.log('CALVIN1', {items})
+    }
     // console.log(`Found ${items.length} token holders`)
     items.map(i => {
       if(!addresses[i.address]){
@@ -109,14 +116,26 @@ const main = async() => {
     let value = addresses[a]
     return {
       address: a,
-      coinLength:Object.keys(value).length
+      coinLength:Object.keys(value).length,
+      values: sortedCoins.map(c => value[c.symbol] || 0 )
     }
   })
   let sortedArray = _.sortBy(addressesArray, 'coinLength').reverse()
   console.log({stats:sortedArray.slice(0,10).map(c => [c.address, c.coinLength].join(','))})
-  fs.writeFileSync('./data/addressranking.csv', sortedArray.map(s => [s.address, s.coinLength].join(',')).join('\n'))
-  // let matrix = sortedCoins.slice(0,10).map(c => {
-  //   let i = sortedArray.slice(0,10).map(a => {
+  let header = {address:'address', ens:'ens', values:sortedCoins.map(c => c.symbol) }
+  let sortedArrayWithEns = []
+  for(var i = 0; i < sortedArray.length; i++){
+    let s = sortedArray[i]
+    if(s.coinLength > 4){
+      s.ens = await readOnlyProvider.lookupAddress(s.address)
+      console.log('***', s.address, s.ens)
+    }
+    sortedArrayWithEns.push(s)
+  }
+  fs.writeFileSync('./data/addressranking.csv', sortedArrayWithEns.map(s => {
+    return [s.address, s.ens, s.coinLength].join(',')
+  }).join('\n'))
+  fs.writeFileSync('./data/addresscoins.csv', [...[header], ...sortedArrayWithEns].map(s => [...[s.address, s.ens], ...s.values].join(',')).join('\n'))
   let matrix = sortedCoins.map(c => {
     let i = sortedArray.map(a => {
     let symbol = c.symbol
@@ -126,7 +145,6 @@ const main = async() => {
     })
     return [c.symbol, i]
   })
-  // console.log({matrix})
   let similarities = []
   for ( var i = 0; i < matrix.length; i++ ) {
       let x, y, s, similars=[]
