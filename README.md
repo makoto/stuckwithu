@@ -3,7 +3,7 @@
 
 Tokens are the new social graph. Discover who holds which personal tokens
 
-![](./image.png)
+![](./cover.png)
 
 
 ## Team
